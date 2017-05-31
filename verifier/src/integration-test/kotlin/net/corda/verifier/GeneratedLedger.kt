@@ -8,6 +8,7 @@ import net.corda.core.identity.AnonymousParty
 import net.corda.core.identity.Party
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.transactions.WireTransaction
+import net.corda.core.utilities.getTestPartyAndCertificate
 import java.io.ByteArrayInputStream
 import java.math.BigInteger
 import java.security.PublicKey
@@ -220,7 +221,7 @@ fun commandGenerator(partiesToPickFrom: Collection<Party>): Generator<Pair<Comma
 }
 
 val partyGenerator: Generator<Party> = Generator.int().combine(publicKeyGenerator) { n, key ->
-    Party(X509Utilities.getDevX509Name("Party$n"), key)
+    getTestPartyAndCertificate(X509Utilities.getDevX509Name("Party$n"), key)
 }
 
 fun <A> pickOneOrMaybeNew(from: Collection<A>, generator: Generator<A>): Generator<A> {

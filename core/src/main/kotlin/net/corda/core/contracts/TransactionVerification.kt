@@ -2,7 +2,7 @@ package net.corda.core.contracts
 
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowException
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import java.security.PublicKey
 import java.util.*
@@ -18,7 +18,7 @@ data class TransactionForContract(val inputs: List<ContractState>,
                                   val attachments: List<Attachment>,
                                   val commands: List<AuthenticatedObject<CommandData>>,
                                   val origHash: SecureHash,
-                                  val inputNotary: Party? = null,
+                                  val inputNotary: PartyWithoutCertificate? = null,
                                   val timeWindow: TimeWindow? = null) {
     override fun hashCode() = origHash.hashCode()
     override fun equals(other: Any?) = other is TransactionForContract && other.origHash == origHash
@@ -106,7 +106,7 @@ sealed class TransactionVerificationException(val txId: SecureHash, cause: Throw
     }
 
     class InvalidNotaryChange(txId: SecureHash) : TransactionVerificationException(txId, null)
-    class NotaryChangeInWrongTransactionType(txId: SecureHash, val txNotary: Party, val outputNotary: Party) : TransactionVerificationException(txId, null) {
+    class NotaryChangeInWrongTransactionType(txId: SecureHash, val txNotary: PartyWithoutCertificate, val outputNotary: PartyWithoutCertificate) : TransactionVerificationException(txId, null) {
         override fun toString(): String {
             return "Found unexpected notary change in transaction. Tx notary: $txNotary, found: $outputNotary"
         }

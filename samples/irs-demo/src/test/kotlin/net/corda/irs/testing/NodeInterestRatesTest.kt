@@ -9,7 +9,7 @@ import net.corda.core.contracts.*
 import net.corda.core.crypto.MerkleTreeException
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.ServiceInfo
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ALICE
@@ -49,7 +49,7 @@ class NodeInterestRatesTest {
         """.trimIndent())
 
     val DUMMY_CASH_ISSUER_KEY = generateKeyPair()
-    val DUMMY_CASH_ISSUER = Party(X500Name("CN=Cash issuer,O=R3,OU=corda,L=London,C=UK"), DUMMY_CASH_ISSUER_KEY.public)
+    val DUMMY_CASH_ISSUER = PartyWithoutCertificate(X500Name("CN=Cash issuer,O=R3,OU=corda,L=London,C=UK"), DUMMY_CASH_ISSUER_KEY.public)
 
     val dummyServices = MockServices(DUMMY_CASH_ISSUER_KEY, MEGA_CORP_KEY)
     val clock get() = dummyServices.clock
@@ -231,7 +231,7 @@ class NodeInterestRatesTest {
     }
 
     class FilteredRatesFlow(tx: TransactionBuilder,
-                            oracle: Party,
+                            oracle: PartyWithoutCertificate,
                             fixOf: FixOf,
                             expectedRate: BigDecimal,
                             rateTolerance: BigDecimal,

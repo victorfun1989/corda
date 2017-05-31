@@ -5,7 +5,7 @@ import com.esotericsoftware.kryo.KryoException
 import net.corda.contracts.asset.Cash
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash.Companion.zeroHash
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.p2PKryo
 import net.corda.core.serialization.serialize
 import net.corda.core.transactions.WireTransaction
@@ -219,7 +219,7 @@ class PartialMerkleTreeTest {
         }
     }
 
-    private fun makeSimpleCashWtx(notary: Party, timeWindow: TimeWindow? = null, attachments: List<SecureHash> = emptyList()): WireTransaction {
+    private fun makeSimpleCashWtx(notary: PartyWithoutCertificate, timeWindow: TimeWindow? = null, attachments: List<SecureHash> = emptyList()): WireTransaction {
         return WireTransaction(
                 inputs = testTx.inputs,
                 attachments = attachments,

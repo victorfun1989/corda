@@ -3,7 +3,7 @@ package net.corda.testing.node
 import net.corda.core.contracts.Attachment
 import net.corda.core.crypto.*
 import net.corda.core.flows.StateMachineRunId
-import net.corda.core.identity.PartyAndCertificate
+import net.corda.core.identity.Party
 import net.corda.core.messaging.SingleMessageRecipient
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.ServiceHub
@@ -100,7 +100,7 @@ class MockKeyManagementService(val identityService: IdentityService,
         return k.public
     }
 
-    override fun freshKeyAndCert(identity: PartyAndCertificate, revocationEnabled: Boolean): Pair<X509CertificateHolder, CertPath> {
+    override fun freshKeyAndCert(identity: Party, revocationEnabled: Boolean): Pair<X509CertificateHolder, CertPath> {
         return freshCertificate(identityService, freshKey(), identity, getSigner(identity.owningKey), revocationEnabled)
     }
 

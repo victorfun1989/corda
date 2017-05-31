@@ -6,7 +6,7 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.VaultService
 import net.corda.core.node.services.unconsumedStates
 import net.corda.core.serialization.OpaqueBytes
@@ -463,7 +463,7 @@ class CashTests {
 
     val THEIR_IDENTITY_1 = AnonymousParty(DUMMY_PUBKEY_2)
 
-    fun makeCash(amount: Amount<Currency>, corp: Party, depositRef: Byte = 1) =
+    fun makeCash(amount: Amount<Currency>, corp: PartyWithoutCertificate, depositRef: Byte = 1) =
             StateAndRef(
                     Cash.State(amount `issued by` corp.ref(depositRef), OUR_IDENTITY_1) `with notary` DUMMY_NOTARY,
                     StateRef(SecureHash.randomSHA256(), Random().nextInt(32))
@@ -479,7 +479,7 @@ class CashTests {
     /**
      * Generate an exit transaction, removing some amount of cash from the ledger.
      */
-    fun makeExit(amount: Amount<Currency>, corp: Party, depositRef: Byte = 1): WireTransaction {
+    fun makeExit(amount: Amount<Currency>, corp: PartyWithoutCertificate, depositRef: Byte = 1): WireTransaction {
         val tx = TransactionType.General.Builder(DUMMY_NOTARY)
         Cash().generateExit(tx, Amount(amount.quantity, Issued(corp.ref(depositRef), amount.token)), WALLET)
         return tx.toWireTransaction()

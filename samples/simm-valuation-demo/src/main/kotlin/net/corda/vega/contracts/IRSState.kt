@@ -6,7 +6,7 @@ import net.corda.core.contracts.TransactionType
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.keys
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.TransactionBuilder
 import java.security.PublicKey
 
@@ -27,7 +27,7 @@ data class IRSState(val swap: SwapData,
         return parties.flatMap { it.owningKey.keys }.intersect(ourKeys).isNotEmpty()
     }
 
-    override fun generateAgreement(notary: Party): TransactionBuilder {
+    override fun generateAgreement(notary: PartyWithoutCertificate): TransactionBuilder {
         val state = IRSState(swap, buyer, seller, OGTrade())
         return TransactionType.General.Builder(notary).withItems(state, Command(OGTrade.Commands.Agree(), parties.map { it.owningKey }))
     }

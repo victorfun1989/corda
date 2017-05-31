@@ -12,7 +12,7 @@ import net.corda.core.contracts.BusinessCalendar
 import net.corda.core.crypto.*
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.node.NodeInfo
 import net.corda.core.node.services.IdentityService
@@ -37,39 +37,39 @@ object JacksonSupport {
 
     interface PartyObjectMapper {
         @Deprecated("Use partyFromX500Name instead")
-        fun partyFromName(partyName: String): Party?
-        fun partyFromX500Name(name: X500Name): Party?
-        fun partyFromKey(owningKey: PublicKey): Party?
+        fun partyFromName(partyName: String): PartyWithoutCertificate?
+        fun partyFromX500Name(name: X500Name): PartyWithoutCertificate?
+        fun partyFromKey(owningKey: PublicKey): PartyWithoutCertificate?
     }
 
     class RpcObjectMapper(val rpc: CordaRPCOps, factory: JsonFactory) : PartyObjectMapper, ObjectMapper(factory) {
         @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-        override fun partyFromName(partyName: String): Party? = rpc.partyFromName(partyName)
-        override fun partyFromX500Name(name: X500Name): Party? = rpc.partyFromX500Name(name)
-        override fun partyFromKey(owningKey: PublicKey): Party? = rpc.partyFromKey(owningKey)
+        override fun partyFromName(partyName: String): PartyWithoutCertificate? = rpc.partyFromName(partyName)
+        override fun partyFromX500Name(name: X500Name): PartyWithoutCertificate? = rpc.partyFromX500Name(name)
+        override fun partyFromKey(owningKey: PublicKey): PartyWithoutCertificate? = rpc.partyFromKey(owningKey)
     }
 
     class IdentityObjectMapper(val identityService: IdentityService, factory: JsonFactory) : PartyObjectMapper, ObjectMapper(factory) {
         @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-        override fun partyFromName(partyName: String): Party? = identityService.partyFromName(partyName)
-        override fun partyFromX500Name(name: X500Name): Party? = identityService.partyFromX500Name(name)
-        override fun partyFromKey(owningKey: PublicKey): Party? = identityService.partyFromKey(owningKey)
+        override fun partyFromName(partyName: String): PartyWithoutCertificate? = identityService.partyFromName(partyName)
+        override fun partyFromX500Name(name: X500Name): PartyWithoutCertificate? = identityService.partyFromX500Name(name)
+        override fun partyFromKey(owningKey: PublicKey): PartyWithoutCertificate? = identityService.partyFromKey(owningKey)
     }
 
     class NoPartyObjectMapper(factory: JsonFactory) : PartyObjectMapper, ObjectMapper(factory) {
         @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-        override fun partyFromName(partyName: String): Party? = throw UnsupportedOperationException()
-        override fun partyFromX500Name(name: X500Name): Party? = throw UnsupportedOperationException()
-        override fun partyFromKey(owningKey: PublicKey): Party? = throw UnsupportedOperationException()
+        override fun partyFromName(partyName: String): PartyWithoutCertificate? = throw UnsupportedOperationException()
+        override fun partyFromX500Name(name: X500Name): PartyWithoutCertificate? = throw UnsupportedOperationException()
+        override fun partyFromKey(owningKey: PublicKey): PartyWithoutCertificate? = throw UnsupportedOperationException()
     }
 
     val cordaModule: Module by lazy {
         SimpleModule("core").apply {
             addSerializer(AnonymousParty::class.java, AnonymousPartySerializer)
             addDeserializer(AnonymousParty::class.java, AnonymousPartyDeserializer)
-            addSerializer(Party::class.java, PartySerializer)
-            addDeserializer(Party::class.java, PartyDeserializer)
-            addDeserializer(AbstractParty::class.java, PartyDeserializer)
+            addSerializer(PartyWithoutCertificate::class.java, PartyWithoutCertificateSerializer)
+            addDeserializer(PartyWithoutCertificate::class.java, PartyWithoutCertificateDeserializer)
+            addDeserializer(AbstractParty::class.java, PartyWithoutCertificateDeserializer)
             addSerializer(BigDecimal::class.java, ToStringSerializer)
             addDeserializer(BigDecimal::class.java, NumberDeserializers.BigDecimalDeserializer())
             addSerializer(SecureHash::class.java, SecureHashSerializer)
@@ -151,14 +151,14 @@ object JacksonSupport {
         }
     }
 
-    object PartySerializer : JsonSerializer<Party>() {
-        override fun serialize(obj: Party, generator: JsonGenerator, provider: SerializerProvider) {
+    object PartyWithoutCertificateSerializer : JsonSerializer<PartyWithoutCertificate>() {
+        override fun serialize(obj: PartyWithoutCertificate, generator: JsonGenerator, provider: SerializerProvider) {
             generator.writeString(obj.name.toString())
         }
     }
 
-    object PartyDeserializer : JsonDeserializer<Party>() {
-        override fun deserialize(parser: JsonParser, context: DeserializationContext): Party {
+    object PartyWithoutCertificateDeserializer : JsonDeserializer<PartyWithoutCertificate>() {
+        override fun deserialize(parser: JsonParser, context: DeserializationContext): PartyWithoutCertificate {
             if (parser.currentToken == JsonToken.FIELD_NAME) {
                 parser.nextToken()
             }
@@ -169,14 +169,14 @@ object JacksonSupport {
             // how to parse the content
             return if (parser.text.contains("=")) {
                 val principal = X500Name(parser.text)
-                mapper.partyFromX500Name(principal) ?: throw JsonParseException(parser, "Could not find a Party with name ${principal}")
+                mapper.partyFromX500Name(principal) ?: throw JsonParseException(parser, "Could not find a party with name ${principal}")
             } else {
                 val key = try {
                     parsePublicKeyBase58(parser.text)
                 } catch (e: Exception) {
                     throw JsonParseException(parser, "Could not interpret ${parser.text} as a base58 encoded public key")
                 }
-                mapper.partyFromKey(key) ?: throw JsonParseException(parser, "Could not find a Party with key ${key.toStringShort()}")
+                mapper.partyFromKey(key) ?: throw JsonParseException(parser, "Could not find a party with key ${key.toStringShort()}")
             }
         }
     }

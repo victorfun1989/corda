@@ -8,7 +8,7 @@ import net.corda.core.flows.FlowInitiator
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowStateMachine
 import net.corda.core.flows.StateMachineRunId
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.DUMMY_CA
@@ -29,7 +29,7 @@ class InteractiveShellTest {
         constructor(b: Int, c: String) : this(b.toString() + c)
         constructor(amount: Amount<Currency>) : this(amount.toString())
         constructor(pair: Pair<Amount<Currency>, SecureHash.SHA256>) : this(pair.toString())
-        constructor(party: Party) : this(party.name.toString())
+        constructor(party: PartyWithoutCertificate) : this(party.name.toString())
         override fun call() = a
     }
 
@@ -69,15 +69,15 @@ class InteractiveShellTest {
     fun party() = check("party: \"${MEGA_CORP.name}\"", MEGA_CORP.name.toString())
 
     class DummyFSM(val logic: FlowA) : FlowStateMachine<Any?> {
-        override fun <T : Any> sendAndReceive(receiveType: Class<T>, otherParty: Party, payload: Any, sessionFlow: FlowLogic<*>, retrySend: Boolean): UntrustworthyData<T> {
+        override fun <T : Any> sendAndReceive(receiveType: Class<T>, otherParty: PartyWithoutCertificate, payload: Any, sessionFlow: FlowLogic<*>, retrySend: Boolean): UntrustworthyData<T> {
             throw UnsupportedOperationException("not implemented")
         }
 
-        override fun <T : Any> receive(receiveType: Class<T>, otherParty: Party, sessionFlow: FlowLogic<*>): UntrustworthyData<T> {
+        override fun <T : Any> receive(receiveType: Class<T>, otherParty: PartyWithoutCertificate, sessionFlow: FlowLogic<*>): UntrustworthyData<T> {
             throw UnsupportedOperationException("not implemented")
         }
 
-        override fun send(otherParty: Party, payload: Any, sessionFlow: FlowLogic<*>) {
+        override fun send(otherParty: PartyWithoutCertificate, payload: Any, sessionFlow: FlowLogic<*>) {
             throw UnsupportedOperationException("not implemented")
         }
 

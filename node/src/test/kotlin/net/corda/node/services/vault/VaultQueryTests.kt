@@ -7,7 +7,7 @@ import net.corda.contracts.testing.fillWithSomeTestCash
 import net.corda.contracts.testing.fillWithSomeTestDeals
 import net.corda.contracts.testing.fillWithSomeTestLinearStates
 import net.corda.core.contracts.*
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.crypto.entropyToKeyPair
 import net.corda.core.days
 import net.corda.core.node.services.Vault
@@ -184,7 +184,7 @@ class VaultQueryTests {
 
 
     val CASH_NOTARY_KEY: KeyPair by lazy { entropyToKeyPair(BigInteger.valueOf(20)) }
-    val CASH_NOTARY: Party get() = Party(DUMMY_NOTARY.name, CASH_NOTARY_KEY.public)
+    val CASH_NOTARY: PartyWithoutCertificate get() = PartyWithoutCertificate(DUMMY_NOTARY.name, CASH_NOTARY_KEY.public)
 
     @Test
     fun `unconsumed states by notary`() {

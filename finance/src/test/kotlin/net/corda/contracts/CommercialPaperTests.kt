@@ -5,7 +5,7 @@ import net.corda.contracts.testing.fillWithSomeTestCash
 import net.corda.core.contracts.*
 import net.corda.core.days
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.VaultService
 import net.corda.core.seconds
@@ -28,8 +28,8 @@ import kotlin.test.assertTrue
 
 interface ICommercialPaperTestTemplate {
     fun getPaper(): ICommercialPaperState
-    fun getIssueCommand(notary: Party): CommandData
-    fun getRedeemCommand(notary: Party): CommandData
+    fun getIssueCommand(notary: PartyWithoutCertificate): CommandData
+    fun getRedeemCommand(notary: PartyWithoutCertificate): CommandData
     fun getMoveCommand(): CommandData
 }
 
@@ -41,8 +41,8 @@ class JavaCommercialPaperTest : ICommercialPaperTestTemplate {
             TEST_TX_TIME + 7.days
     )
 
-    override fun getIssueCommand(notary: Party): CommandData = JavaCommercialPaper.Commands.Issue()
-    override fun getRedeemCommand(notary: Party): CommandData = JavaCommercialPaper.Commands.Redeem()
+    override fun getIssueCommand(notary: PartyWithoutCertificate): CommandData = JavaCommercialPaper.Commands.Issue()
+    override fun getRedeemCommand(notary: PartyWithoutCertificate): CommandData = JavaCommercialPaper.Commands.Redeem()
     override fun getMoveCommand(): CommandData = JavaCommercialPaper.Commands.Move()
 }
 
@@ -54,8 +54,8 @@ class KotlinCommercialPaperTest : ICommercialPaperTestTemplate {
             maturityDate = TEST_TX_TIME + 7.days
     )
 
-    override fun getIssueCommand(notary: Party): CommandData = CommercialPaper.Commands.Issue()
-    override fun getRedeemCommand(notary: Party): CommandData = CommercialPaper.Commands.Redeem()
+    override fun getIssueCommand(notary: PartyWithoutCertificate): CommandData = CommercialPaper.Commands.Issue()
+    override fun getRedeemCommand(notary: PartyWithoutCertificate): CommandData = CommercialPaper.Commands.Redeem()
     override fun getMoveCommand(): CommandData = CommercialPaper.Commands.Move()
 }
 
@@ -67,8 +67,8 @@ class KotlinCommercialPaperLegacyTest : ICommercialPaperTestTemplate {
             maturityDate = TEST_TX_TIME + 7.days
     )
 
-    override fun getIssueCommand(notary: Party): CommandData = CommercialPaperLegacy.Commands.Issue()
-    override fun getRedeemCommand(notary: Party): CommandData = CommercialPaperLegacy.Commands.Redeem()
+    override fun getIssueCommand(notary: PartyWithoutCertificate): CommandData = CommercialPaperLegacy.Commands.Issue()
+    override fun getRedeemCommand(notary: PartyWithoutCertificate): CommandData = CommercialPaperLegacy.Commands.Redeem()
     override fun getMoveCommand(): CommandData = CommercialPaperLegacy.Commands.Move()
 }
 

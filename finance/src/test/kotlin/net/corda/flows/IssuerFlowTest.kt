@@ -8,7 +8,7 @@ import net.corda.core.contracts.currency
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowStateMachine
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.map
 import net.corda.core.serialization.OpaqueBytes
 import net.corda.core.toFuture
@@ -99,7 +99,7 @@ class IssuerFlowTest {
     private fun runIssuerAndIssueRequester(issuerNode: MockNode,
                                            issueToNode: MockNode,
                                            amount: Amount<Currency>,
-                                           party: Party,
+                                           party: PartyWithoutCertificate,
                                            ref: OpaqueBytes): RunResult {
         val issueToPartyAndRef = party.ref(ref)
         val issuerFlows: Observable<IssuerFlow.Issuer> = issuerNode.registerInitiatedFlow(IssuerFlow.Issuer::class.java)

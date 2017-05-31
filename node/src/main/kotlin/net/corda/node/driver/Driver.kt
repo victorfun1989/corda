@@ -13,8 +13,8 @@ import net.corda.core.*
 import net.corda.core.crypto.X509Utilities
 import net.corda.core.crypto.appendToCommonName
 import net.corda.core.crypto.commonName
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.internal.ShutdownHook
 import net.corda.core.internal.addShutdownHook
 import net.corda.core.messaging.CordaRPCOps
@@ -67,7 +67,7 @@ interface DriverDSLExposedInterface : CordformContext {
     /**
      * Starts a [net.corda.node.internal.Node] in a separate process.
      *
-     * @param providedName Optional name of the node, which will be its legal name in [Party]. Defaults to something
+     * @param providedName Optional name of the node, which will be its legal name in [PartyWithoutCertificate]. Defaults to something
      *   random. Note that this must be unique as the driver uses it as a primary key!
      * @param advertisedServices The set of services to be advertised by the node. Defaults to empty set.
      * @param verifierType The type of transaction verifier to use. See: [VerifierType]
@@ -90,14 +90,14 @@ interface DriverDSLExposedInterface : CordformContext {
      * @param type The advertised notary service type. Currently the only supported type is [RaftValidatingNotaryService.type].
      * @param verifierType The type of transaction verifier to use. See: [VerifierType]
      * @param rpcUsers List of users who are authorised to use the RPC system. Defaults to empty list.
-     * @return The [Party] identity of the distributed notary service, and the [NodeInfo]s of the notaries in the cluster.
+     * @return The [PartyWithoutCertificate] identity of the distributed notary service, and the [NodeInfo]s of the notaries in the cluster.
      */
     fun startNotaryCluster(
             notaryName: X500Name,
             clusterSize: Int = 3,
             type: ServiceType = RaftValidatingNotaryService.type,
             verifierType: VerifierType = VerifierType.InMemory,
-            rpcUsers: List<User> = emptyList()): Future<Pair<PartyAndCertificate, List<NodeHandle>>>
+            rpcUsers: List<User> = emptyList()): Future<Pair<Party, List<NodeHandle>>>
 
     /**
      * Starts a web server for a node
@@ -554,7 +554,7 @@ class DriverDSL(
             type: ServiceType,
             verifierType: VerifierType,
             rpcUsers: List<User>
-    ): ListenableFuture<Pair<PartyAndCertificate, List<NodeHandle>>> {
+    ): ListenableFuture<Pair<Party, List<NodeHandle>>> {
         val nodeNames = (0 until clusterSize).map { DUMMY_NOTARY.name.appendToCommonName(" $it") }
         val paths = nodeNames.map { baseDirectory(it) }
         ServiceIdentityGenerator.generateToDisk(paths, DUMMY_CA, type.id, notaryName)

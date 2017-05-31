@@ -10,8 +10,8 @@ import net.corda.core.crypto.keys
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.services.TimeWindowChecker
 import net.corda.core.node.services.UniquenessException
 import net.corda.core.node.services.UniquenessProvider
@@ -44,7 +44,7 @@ object NotaryFlow {
             fun tracker() = ProgressTracker(REQUESTING, VALIDATING)
         }
 
-        lateinit var notaryParty: Party
+        lateinit var notaryParty: PartyWithoutCertificate
 
         @Suspendable
         @Throws(NotaryException::class)
@@ -97,7 +97,7 @@ object NotaryFlow {
      * Additional transaction validation logic can be added when implementing [receiveAndVerifyTx].
      */
     // See AbstractStateReplacementFlow.Acceptor for why it's Void?
-    abstract class Service(val otherSide: PartyAndCertificate,
+    abstract class Service(val otherSide: Party,
                            val timeWindowChecker: TimeWindowChecker,
                            val uniquenessProvider: UniquenessProvider) : FlowLogic<Void?>() {
         @Suspendable

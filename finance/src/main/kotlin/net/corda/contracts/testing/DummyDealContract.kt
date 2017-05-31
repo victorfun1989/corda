@@ -7,7 +7,7 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.*
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.TransactionBuilder
 import java.security.PublicKey
 
@@ -26,7 +26,7 @@ class DummyDealContract : Contract {
             return participants.any { it.owningKey.containsAny(ourKeys) }
         }
 
-        override fun generateAgreement(notary: Party): TransactionBuilder {
+        override fun generateAgreement(notary: PartyWithoutCertificate): TransactionBuilder {
             throw UnsupportedOperationException("not implemented")
         }
     }

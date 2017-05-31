@@ -14,8 +14,8 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowStateMachine
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.services.linearHeadsOfType
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.DUMMY_CA
@@ -131,7 +131,7 @@ class IRSSimulation(networkSendManuallyPumped: Boolean, runAsync: Boolean, laten
         node2.registerInitiatedFlow(FixingFlow.Fixer::class.java)
 
         @InitiatingFlow
-        class StartDealFlow(val otherParty: PartyAndCertificate,
+        class StartDealFlow(val otherParty: Party,
                             val payload: AutoOffer,
                             val myKey: PublicKey) : FlowLogic<SignedTransaction>() {
             @Suspendable
@@ -139,7 +139,7 @@ class IRSSimulation(networkSendManuallyPumped: Boolean, runAsync: Boolean, laten
         }
 
         @InitiatedBy(StartDealFlow::class)
-        class AcceptDealFlow(otherParty: Party) : Acceptor(otherParty)
+        class AcceptDealFlow(otherParty: PartyWithoutCertificate) : Acceptor(otherParty)
 
         val acceptDealFlows: Observable<AcceptDealFlow> = node2.registerInitiatedFlow(AcceptDealFlow::class.java)
 

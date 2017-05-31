@@ -5,8 +5,8 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.unwrap
@@ -17,11 +17,11 @@ import net.corda.vega.contracts.SwapData
 
 object IRSTradeFlow {
     @CordaSerializable
-    data class OfferMessage(val notary: Party, val dealBeingOffered: IRSState)
+    data class OfferMessage(val notary: PartyWithoutCertificate, val dealBeingOffered: IRSState)
 
     @InitiatingFlow
     @StartableByRPC
-    class Requester(val swap: SwapData, val otherParty: PartyAndCertificate) : FlowLogic<SignedTransaction>() {
+    class Requester(val swap: SwapData, val otherParty: Party) : FlowLogic<SignedTransaction>() {
         @Suspendable
         override fun call(): SignedTransaction {
             require(serviceHub.networkMapCache.notaryNodes.isNotEmpty()) { "No notary nodes registered" }
@@ -48,7 +48,7 @@ object IRSTradeFlow {
     }
 
     @InitiatedBy(Requester::class)
-    class Receiver(private val replyToParty: Party) : FlowLogic<Unit>() {
+    class Receiver(private val replyToParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             logger.info("IRSTradeFlow receiver started")

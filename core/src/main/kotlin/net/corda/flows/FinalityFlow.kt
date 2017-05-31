@@ -6,7 +6,7 @@ import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.TransactionState
 import net.corda.core.crypto.isFulfilledBy
 import net.corda.core.flows.FlowLogic
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.transactions.SignedTransaction
@@ -33,9 +33,9 @@ import net.corda.core.utilities.ProgressTracker
  * @param extraRecipients A list of additional participants to inform of the transaction.
  */
 class FinalityFlow(val transactions: Iterable<SignedTransaction>,
-                   val extraRecipients: Set<Party>,
+                   val extraRecipients: Set<PartyWithoutCertificate>,
                    override val progressTracker: ProgressTracker) : FlowLogic<List<SignedTransaction>>() {
-    constructor(transaction: SignedTransaction, extraParticipants: Set<Party>) : this(listOf(transaction), extraParticipants, tracker())
+    constructor(transaction: SignedTransaction, extraParticipants: Set<PartyWithoutCertificate>) : this(listOf(transaction), extraParticipants, tracker())
     constructor(transaction: SignedTransaction) : this(listOf(transaction), emptySet(), tracker())
     constructor(transaction: SignedTransaction, progressTracker: ProgressTracker) : this(listOf(transaction), emptySet(), progressTracker)
 
@@ -73,7 +73,7 @@ class FinalityFlow(val transactions: Iterable<SignedTransaction>,
     // TODO: API: Make some of these protected?
 
     @Suspendable
-    private fun notariseAndRecord(stxnsAndParties: List<Pair<SignedTransaction, Set<Party>>>): List<Pair<SignedTransaction, Set<Party>>> {
+    private fun notariseAndRecord(stxnsAndParties: List<Pair<SignedTransaction, Set<PartyWithoutCertificate>>>): List<Pair<SignedTransaction, Set<PartyWithoutCertificate>>> {
         return stxnsAndParties.map { pair ->
             val stx = pair.first
             val notarised = if (needsNotarySignature(stx)) {
@@ -100,7 +100,7 @@ class FinalityFlow(val transactions: Iterable<SignedTransaction>,
         return !(notaryKey?.isFulfilledBy(signers) ?: false)
     }
 
-    private fun lookupParties(ltxns: List<Pair<SignedTransaction, LedgerTransaction>>): List<Pair<SignedTransaction, Set<Party>>> {
+    private fun lookupParties(ltxns: List<Pair<SignedTransaction, LedgerTransaction>>): List<Pair<SignedTransaction, Set<PartyWithoutCertificate>>> {
         return ltxns.map { pair ->
             val (stx, ltx) = pair
             // Calculate who is meant to see the results based on the participants involved.

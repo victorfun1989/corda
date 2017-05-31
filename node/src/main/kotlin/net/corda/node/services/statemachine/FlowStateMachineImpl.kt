@@ -10,7 +10,7 @@ import net.corda.core.ErrorOr
 import net.corda.core.abbreviate
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.*
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.random63BitValue
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
@@ -89,7 +89,7 @@ class FlowStateMachineImpl<R>(override val id: StateMachineRunId,
         get() = _resultFuture ?: SettableFuture.create<R>().also { _resultFuture = it }
 
     // This state IS serialised, as we need it to know what the fiber is waiting for.
-    internal val openSessions = HashMap<Pair<FlowLogic<*>, Party>, FlowSession>()
+    internal val openSessions = HashMap<Pair<FlowLogic<*>, PartyWithoutCertificate>, FlowSession>()
     internal var waitingForResponse: WaitingRequest? = null
     internal var hasSoftLockedStates: Boolean = false
         set(value) {
@@ -161,7 +161,7 @@ class FlowStateMachineImpl<R>(override val id: StateMachineRunId,
 
     @Suspendable
     override fun <T : Any> sendAndReceive(receiveType: Class<T>,
-                                          otherParty: Party,
+                                          otherParty: PartyWithoutCertificate,
                                           payload: Any,
                                           sessionFlow: FlowLogic<*>,
                                           retrySend: Boolean): UntrustworthyData<T> {
@@ -181,7 +181,7 @@ class FlowStateMachineImpl<R>(override val id: StateMachineRunId,
 
     @Suspendable
     override fun <T : Any> receive(receiveType: Class<T>,
-                                   otherParty: Party,
+                                   otherParty: PartyWithoutCertificate,
                                    sessionFlow: FlowLogic<*>): UntrustworthyData<T> {
         logger.debug { "receive(${receiveType.name}, $otherParty) ..." }
         val session = getConfirmedSession(otherParty, sessionFlow) ?:
@@ -192,7 +192,7 @@ class FlowStateMachineImpl<R>(override val id: StateMachineRunId,
     }
 
     @Suspendable
-    override fun send(otherParty: Party, payload: Any, sessionFlow: FlowLogic<*>) {
+    override fun send(otherParty: PartyWithoutCertificate, payload: Any, sessionFlow: FlowLogic<*>) {
         logger.debug { "send($otherParty, ${payload.toString().abbreviate(300)})" }
         val session = getConfirmedSession(otherParty, sessionFlow)
         if (session == null) {
@@ -297,7 +297,7 @@ class FlowStateMachineImpl<R>(override val id: StateMachineRunId,
     }
 
     @Suspendable
-    private fun getConfirmedSession(otherParty: Party, sessionFlow: FlowLogic<*>): FlowSession? {
+    private fun getConfirmedSession(otherParty: PartyWithoutCertificate, sessionFlow: FlowLogic<*>): FlowSession? {
         return openSessions[Pair(sessionFlow, otherParty)]?.apply {
             if (state is FlowSessionState.Initiating) {
                 // Session still initiating, try to retrieve the init response.
@@ -313,7 +313,7 @@ class FlowStateMachineImpl<R>(override val id: StateMachineRunId,
      * multiple public keys, but we **don't support multiple nodes advertising the same legal identity**.
      */
     @Suspendable
-    private fun startNewSession(otherParty: Party,
+    private fun startNewSession(otherParty: PartyWithoutCertificate,
                                 sessionFlow: FlowLogic<*>,
                                 firstPayload: Any?,
                                 waitForConfirmation: Boolean,

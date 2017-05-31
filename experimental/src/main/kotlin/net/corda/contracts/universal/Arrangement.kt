@@ -1,7 +1,7 @@
 package net.corda.contracts.universal
 
 import net.corda.core.contracts.Frequency
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -26,7 +26,7 @@ class Zero : Arrangement {
 //
 // TODO: should be replaced with something that uses Corda assets and/or cash?
 // TODO: should only be allowed to transfer non-negative amounts
-data class Obligation(val amount: Perceivable<BigDecimal>, val currency: Currency, val from: Party, val to: Party) : Arrangement
+data class Obligation(val amount: Perceivable<BigDecimal>, val currency: Currency, val from: PartyWithoutCertificate, val to: PartyWithoutCertificate) : Arrangement
 
 // A combinator over a list of arrangements. Each arrangement in list will create a separate independent arrangement state.
 // The ``And`` combinator cannot be root in a arrangement.

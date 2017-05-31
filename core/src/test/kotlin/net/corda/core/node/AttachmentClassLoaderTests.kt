@@ -6,7 +6,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.AttachmentStorage
 import net.corda.core.node.services.StorageService
 import net.corda.core.serialization.*
@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.net.URLClassLoader
-import java.security.PublicKey
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 import kotlin.test.assertEquals
@@ -31,7 +30,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 interface DummyContractBackdoor {
-    fun generateInitial(owner: PartyAndReference, magicNumber: Int, notary: Party): TransactionBuilder
+    fun generateInitial(owner: PartyAndReference, magicNumber: Int, notary: PartyWithoutCertificate): TransactionBuilder
     fun inspectState(state: ContractState): Int
 }
 
@@ -69,7 +68,7 @@ class AttachmentClassLoaderTests {
         // The "empty contract"
         override val legalContractReference: SecureHash = SecureHash.sha256("")
 
-        fun generateInitial(owner: PartyAndReference, magicNumber: Int, notary: Party): TransactionBuilder {
+        fun generateInitial(owner: PartyAndReference, magicNumber: Int, notary: PartyWithoutCertificate): TransactionBuilder {
             val state = State(magicNumber)
             return TransactionType.General.Builder(notary = notary).withItems(state, Command(Commands.Create(), owner.party.owningKey))
         }

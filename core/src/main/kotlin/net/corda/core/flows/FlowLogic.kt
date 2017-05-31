@@ -3,6 +3,7 @@ package net.corda.core.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
@@ -68,7 +69,7 @@ abstract class FlowLogic<out T> {
      *
      * @returns an [UntrustworthyData] wrapper around the received object.
      */
-    inline fun <reified R : Any> sendAndReceive(otherParty: Party, payload: Any): UntrustworthyData<R> {
+    inline fun <reified R : Any> sendAndReceive(otherParty: PartyWithoutCertificate, payload: Any): UntrustworthyData<R> {
         return sendAndReceive(R::class.java, otherParty, payload)
     }
 
@@ -84,12 +85,12 @@ abstract class FlowLogic<out T> {
      * @returns an [UntrustworthyData] wrapper around the received object.
      */
     @Suspendable
-    open fun <R : Any> sendAndReceive(receiveType: Class<R>, otherParty: Party, payload: Any): UntrustworthyData<R> {
+    open fun <R : Any> sendAndReceive(receiveType: Class<R>, otherParty: PartyWithoutCertificate, payload: Any): UntrustworthyData<R> {
         return stateMachine.sendAndReceive(receiveType, otherParty, payload, flowUsedForSessions)
     }
 
     /** @see sendAndReceiveWithRetry */
-    internal inline fun <reified R : Any> sendAndReceiveWithRetry(otherParty: Party, payload: Any): UntrustworthyData<R> {
+    internal inline fun <reified R : Any> sendAndReceiveWithRetry(otherParty: PartyWithoutCertificate, payload: Any): UntrustworthyData<R> {
         return sendAndReceiveWithRetry(R::class.java, otherParty, payload)
     }
 
@@ -103,7 +104,7 @@ abstract class FlowLogic<out T> {
      * to a different one, so there is no need to wait until the initial node comes back up to obtain a response.
      */
     @Suspendable
-    internal open fun <R : Any> sendAndReceiveWithRetry(receiveType: Class<R>, otherParty: Party, payload: Any): UntrustworthyData<R> {
+    internal open fun <R : Any> sendAndReceiveWithRetry(receiveType: Class<R>, otherParty: PartyWithoutCertificate, payload: Any): UntrustworthyData<R> {
         return stateMachine.sendAndReceive(receiveType, otherParty, payload, flowUsedForSessions, true)
     }
 
@@ -114,7 +115,7 @@ abstract class FlowLogic<out T> {
      * verified for consistency and that all expectations are satisfied, as a malicious peer may send you subtly
      * corrupted data in order to exploit your code.
      */
-    inline fun <reified R : Any> receive(otherParty: Party): UntrustworthyData<R> = receive(R::class.java, otherParty)
+    inline fun <reified R : Any> receive(otherParty: PartyWithoutCertificate): UntrustworthyData<R> = receive(R::class.java, otherParty)
 
     /**
      * Suspends until the specified [otherParty] sends us a message of type [receiveType].
@@ -126,7 +127,7 @@ abstract class FlowLogic<out T> {
      * @returns an [UntrustworthyData] wrapper around the received object.
      */
     @Suspendable
-    open fun <R : Any> receive(receiveType: Class<R>, otherParty: Party): UntrustworthyData<R> {
+    open fun <R : Any> receive(receiveType: Class<R>, otherParty: PartyWithoutCertificate): UntrustworthyData<R> {
         return stateMachine.receive(receiveType, otherParty, flowUsedForSessions)
     }
 
@@ -138,7 +139,7 @@ abstract class FlowLogic<out T> {
      * network's event horizon time.
      */
     @Suspendable
-    open fun send(otherParty: Party, payload: Any) = stateMachine.send(otherParty, payload, flowUsedForSessions)
+    open fun send(otherParty: PartyWithoutCertificate, payload: Any) = stateMachine.send(otherParty, payload, flowUsedForSessions)
 
     /**
      * Invokes the given subflow. This function returns once the subflow completes successfully with the result

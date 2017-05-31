@@ -8,7 +8,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.flows.SchedulableFlow
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.ServiceInfo
 import net.corda.core.node.services.linearHeadsOfType
 import net.corda.core.utilities.DUMMY_NOTARY
@@ -33,8 +33,8 @@ class ScheduledFlowTests {
     lateinit var nodeB: MockNetwork.MockNode
 
     data class ScheduledState(val creationTime: Instant,
-                              val source: Party,
-                              val destination: Party,
+                              val source: PartyWithoutCertificate,
+                              val destination: PartyWithoutCertificate,
                               val processed: Boolean = false,
                               override val linearId: UniqueIdentifier = UniqueIdentifier(),
                               override val contract: Contract = DummyContract()) : SchedulableState, LinearState {
@@ -54,7 +54,7 @@ class ScheduledFlowTests {
         }
     }
 
-    class InsertInitialStateFlow(val destination: Party) : FlowLogic<Unit>() {
+    class InsertInitialStateFlow(val destination: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             val scheduledState = ScheduledState(serviceHub.clock.instant(),

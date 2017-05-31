@@ -9,7 +9,7 @@ import com.esotericsoftware.kryo.util.MapReferenceResolver
 import com.google.common.annotations.VisibleForTesting
 import net.corda.core.contracts.*
 import net.corda.core.crypto.*
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.AttachmentsClassLoader
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.LazyPool
@@ -33,7 +33,6 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.cert.CertPath
 import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
 import java.security.spec.InvalidKeySpecException
 import java.time.Instant
 import java.util.*
@@ -351,7 +350,7 @@ object WireTransactionSerializer : Serializer<WireTransaction>() {
         kryo.useClassLoader(attachmentsClassLoader(kryo, attachmentHashes) ?: javaClass.classLoader) {
             val outputs = kryo.readClassAndObject(input) as List<TransactionState<ContractState>>
             val commands = kryo.readClassAndObject(input) as List<Command>
-            val notary = kryo.readClassAndObject(input) as Party?
+            val notary = kryo.readClassAndObject(input) as PartyWithoutCertificate?
             val signers = kryo.readClassAndObject(input) as List<PublicKey>
             val transactionType = kryo.readClassAndObject(input) as TransactionType
             val timeWindow = kryo.readClassAndObject(input) as TimeWindow?

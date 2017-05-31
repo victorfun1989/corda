@@ -1,7 +1,7 @@
 package net.corda.vega.api
 
 import com.opengamma.strata.product.common.BuySell
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.vega.contracts.SwapData
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -25,7 +25,7 @@ data class SwapDataModel(
     /**
      * Turn this model into the internal representation of SwapData.
      */
-    fun toData(buyer: Party, seller: Party): SwapData {
+    fun toData(buyer: PartyWithoutCertificate, seller: PartyWithoutCertificate): SwapData {
         return SwapData(
                 Pair("swap", id), Pair("party", buyer.owningKey), Pair("party", seller.owningKey), description, tradeDate, convention, startDate, endDate, notional, fixedRate
         )

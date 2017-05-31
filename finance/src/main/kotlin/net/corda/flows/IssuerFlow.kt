@@ -3,7 +3,7 @@ package net.corda.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.serialization.OpaqueBytes
 import net.corda.core.transactions.SignedTransaction
@@ -20,7 +20,7 @@ import java.util.*
  */
 object IssuerFlow {
     @CordaSerializable
-    data class IssuanceRequestState(val amount: Amount<Currency>, val issueToParty: Party, val issuerPartyRef: OpaqueBytes)
+    data class IssuanceRequestState(val amount: Amount<Currency>, val issueToParty: PartyWithoutCertificate, val issuerPartyRef: OpaqueBytes)
 
     /**
      * IssuanceRequester should be used by a client to ask a remote node to issue some [FungibleAsset] with the given details.
@@ -28,8 +28,8 @@ object IssuerFlow {
      */
     @InitiatingFlow
     @StartableByRPC
-    class IssuanceRequester(val amount: Amount<Currency>, val issueToParty: Party, val issueToPartyRef: OpaqueBytes,
-                            val issuerBankParty: Party) : FlowLogic<SignedTransaction>() {
+    class IssuanceRequester(val amount: Amount<Currency>, val issueToParty: PartyWithoutCertificate, val issueToPartyRef: OpaqueBytes,
+                            val issuerBankParty: PartyWithoutCertificate) : FlowLogic<SignedTransaction>() {
         @Suspendable
         @Throws(CashException::class)
         override fun call(): SignedTransaction {
@@ -43,7 +43,7 @@ object IssuerFlow {
      * Returns the generated transaction representing the transfer of the [Issued] [FungibleAsset] to the issue requester.
      */
     @InitiatedBy(IssuanceRequester::class)
-    class Issuer(val otherParty: Party) : FlowLogic<SignedTransaction>() {
+    class Issuer(val otherParty: PartyWithoutCertificate) : FlowLogic<SignedTransaction>() {
         companion object {
             object AWAITING_REQUEST : ProgressTracker.Step("Awaiting issuance request")
             object ISSUING : ProgressTracker.Step("Self issuing asset")
@@ -74,7 +74,7 @@ object IssuerFlow {
 
         @Suspendable
         private fun issueCashTo(amount: Amount<Currency>,
-                                issueTo: Party,
+                                issueTo: PartyWithoutCertificate,
                                 issuerPartyRef: OpaqueBytes): SignedTransaction {
             // TODO: pass notary in as request parameter
             val notaryParty = serviceHub.networkMapCache.notaryNodes[0].notaryIdentity

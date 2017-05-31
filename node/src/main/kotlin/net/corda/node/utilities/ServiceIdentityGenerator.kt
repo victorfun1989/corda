@@ -2,7 +2,6 @@ package net.corda.node.utilities
 
 import net.corda.core.crypto.*
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.serialization.serialize
 import net.corda.core.serialization.storageKryo
 import net.corda.core.utilities.loggerFor
@@ -40,7 +39,7 @@ object ServiceIdentityGenerator {
         //        serviceCa.keyPair, serviceName, notaryKey)
         val notaryCert = X509Utilities.createSelfSignedCACertificate(serviceName, generateKeyPair())
         val notaryCertPath = X509Utilities.createCertificatePath(serviceCa.certificate, notaryCert, revocationEnabled = false)
-        val notaryParty = PartyAndCertificate(serviceName, notaryKey, notaryCert, notaryCertPath).serialize()
+        val notaryParty = Party(serviceName, notaryKey, notaryCert, notaryCertPath).serialize()
 
         keyPairs.zip(dirs) { keyPair, dir ->
             Files.createDirectories(dir)

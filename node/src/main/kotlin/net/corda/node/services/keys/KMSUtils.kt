@@ -5,7 +5,7 @@ import net.corda.core.crypto.ContentSignerBuilder
 import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.X509Utilities
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.PartyAndCertificate
+import net.corda.core.identity.Party
 import net.corda.core.node.services.IdentityService
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.operator.ContentSigner
@@ -30,7 +30,7 @@ import java.util.*
  */
 fun freshCertificate(identityService: IdentityService,
                      subjectPublicKey: PublicKey,
-                     issuer: PartyAndCertificate,
+                     issuer: Party,
                      issuerSigner: ContentSigner,
                      revocationEnabled: Boolean = false): Pair<X509CertificateHolder, CertPath> {
     val issuerCertificate = issuer.certificate

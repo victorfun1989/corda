@@ -6,6 +6,7 @@ import net.corda.core.flows.FlowLogicRef
 import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.ServiceType
 import net.corda.core.serialization.*
 import net.corda.core.transactions.TransactionBuilder
@@ -126,7 +127,7 @@ data class TransactionState<out T : ContractState> @JvmOverloads constructor(
         /** The custom contract state */
         val data: T,
         /** Identity of the notary that ensures the state is not used as an input to a transaction more than once */
-        val notary: Party,
+        val notary: PartyWithoutCertificate,
         /**
          * All contract states may be _encumbered_ by up to one other state.
          *
@@ -291,7 +292,7 @@ interface DealState : LinearState {
      * TODO: This should more likely be a method on the Contract (on a common interface) and the changes to reference a
      * Contract instance from a ContractState are imminent, at which point we can move this out of here.
      */
-    fun generateAgreement(notary: Party): TransactionBuilder
+    fun generateAgreement(notary: PartyWithoutCertificate): TransactionBuilder
 }
 
 /**
@@ -400,7 +401,7 @@ data class UpgradeCommand(val upgradedContractClass: Class<out UpgradedContract<
 data class AuthenticatedObject<out T : Any>(
         val signers: List<PublicKey>,
         /** If any public keys were recognised, the looked up institutions are available here */
-        val signingParties: List<Party>,
+        val signingParties: List<PartyWithoutCertificate>,
         val value: T
 )
 

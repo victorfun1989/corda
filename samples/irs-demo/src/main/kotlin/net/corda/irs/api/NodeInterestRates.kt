@@ -9,6 +9,7 @@ import net.corda.core.crypto.keys
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.math.CubicSplineInterpolator
 import net.corda.core.math.Interpolator
 import net.corda.core.math.InterpolatorFactory
@@ -53,7 +54,7 @@ object NodeInterestRates {
 
     // DOCSTART 2
     @InitiatedBy(RatesFixFlow.FixSignFlow::class)
-    class FixSignHandler(val otherParty: Party) : FlowLogic<Unit>() {
+    class FixSignHandler(val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             val request = receive<RatesFixFlow.SignRequest>(otherParty).unwrap { it }
@@ -62,7 +63,7 @@ object NodeInterestRates {
     }
 
     @InitiatedBy(RatesFixFlow.FixQueryFlow::class)
-    class FixQueryHandler(val otherParty: Party) : FlowLogic<Unit>() {
+    class FixQueryHandler(val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         object RECEIVED : ProgressTracker.Step("Received fix request")
         object SENDING : ProgressTracker.Step("Sending fix response")
 

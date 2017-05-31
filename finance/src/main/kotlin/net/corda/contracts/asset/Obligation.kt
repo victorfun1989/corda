@@ -10,7 +10,7 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.entropyToKeyPair
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.random63BitValue
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.TransactionBuilder
@@ -474,12 +474,12 @@ class Obligation<P : Any> : Contract {
                       issuanceDef: Terms<P>,
                       pennies: Long,
                       beneficiary: AbstractParty,
-                      notary: Party)
+                      notary: PartyWithoutCertificate)
     = OnLedgerAsset.generateIssue(tx, TransactionState(State(Lifecycle.NORMAL, obligor, issuanceDef, pennies, beneficiary), notary), Commands.Issue())
 
     fun generatePaymentNetting(tx: TransactionBuilder,
                                issued: Issued<Obligation.Terms<P>>,
-                               notary: Party,
+                               notary: PartyWithoutCertificate,
                                vararg states: State<P>) {
         requireThat {
             "all states are in the normal lifecycle state " using (states.all { it.lifecycle == Lifecycle.NORMAL })
@@ -519,7 +519,7 @@ class Obligation<P : Any> : Contract {
     fun generateSetLifecycle(tx: TransactionBuilder,
                              statesAndRefs: List<StateAndRef<State<P>>>,
                              lifecycle: Lifecycle,
-                             notary: Party) {
+                             notary: PartyWithoutCertificate) {
         val states = statesAndRefs.map { it.state.data }
         val issuanceDef = getTermsOrThrow(states)
         val existingLifecycle = when (lifecycle) {
@@ -555,7 +555,7 @@ class Obligation<P : Any> : Contract {
                        statesAndRefs: Iterable<StateAndRef<State<P>>>,
                        assetStatesAndRefs: Iterable<StateAndRef<FungibleAsset<P>>>,
                        moveCommand: MoveCommand,
-                       notary: Party) {
+                       notary: PartyWithoutCertificate) {
         val states = statesAndRefs.map { it.state }
         val obligationIssuer = states.first().data.obligor
         val obligationOwner = states.first().data.beneficiary
@@ -723,7 +723,7 @@ infix fun <T : Any> Obligation.State<T>.`issued by`(party: AbstractParty) = copy
 /** A randomly generated key. */
 val DUMMY_OBLIGATION_ISSUER_KEY by lazy { entropyToKeyPair(BigInteger.valueOf(10)) }
 /** A dummy, randomly generated issuer party by the name of "Snake Oil Issuer" */
-val DUMMY_OBLIGATION_ISSUER by lazy { Party(X500Name("CN=Snake Oil Issuer,O=R3,OU=corda,L=London,C=UK"), DUMMY_OBLIGATION_ISSUER_KEY.public) }
+val DUMMY_OBLIGATION_ISSUER by lazy { PartyWithoutCertificate(X500Name("CN=Snake Oil Issuer,O=R3,OU=corda,L=London,C=UK"), DUMMY_OBLIGATION_ISSUER_KEY.public) }
 
 val Issued<Currency>.OBLIGATION_DEF: Obligation.Terms<Currency>
     get() = Obligation.Terms(nonEmptySetOf(Cash().legalContractReference), nonEmptySetOf(this), TEST_TX_TIME)

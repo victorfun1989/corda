@@ -9,7 +9,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.random63BitValue
 import net.corda.core.utilities.ALICE
@@ -215,7 +215,7 @@ abstract class MQSecurityTest : NodeBasedTest() {
                 .withMessageContaining(permission)
     }
 
-    private fun startBobAndCommunicateWithAlice(): Party {
+    private fun startBobAndCommunicateWithAlice(): PartyWithoutCertificate {
         val bob = startNode(BOB.name).getOrThrow()
         bob.registerInitiatedFlow(ReceiveFlow::class.java)
         val bobParty = bob.info.legalIdentity
@@ -225,13 +225,13 @@ abstract class MQSecurityTest : NodeBasedTest() {
     }
 
     @InitiatingFlow
-    private class SendFlow(val otherParty: Party, val payload: Any) : FlowLogic<Unit>() {
+    private class SendFlow(val otherParty: PartyWithoutCertificate, val payload: Any) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() = send(otherParty, payload)
     }
 
     @InitiatedBy(SendFlow::class)
-    private class ReceiveFlow(val otherParty: Party) : FlowLogic<Any>() {
+    private class ReceiveFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<Any>() {
         @Suspendable
         override fun call() = receive<Any>(otherParty).unwrap { it }
     }

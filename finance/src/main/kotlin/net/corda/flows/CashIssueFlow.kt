@@ -5,7 +5,7 @@ import net.corda.contracts.asset.Cash
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.TransactionType
 import net.corda.core.contracts.issuedBy
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.serialization.OpaqueBytes
 import net.corda.core.transactions.SignedTransaction
@@ -24,13 +24,13 @@ import java.util.*
 @StartableByRPC
 class CashIssueFlow(val amount: Amount<Currency>,
                     val issueRef: OpaqueBytes,
-                    val recipient: Party,
-                    val notary: Party,
+                    val recipient: PartyWithoutCertificate,
+                    val notary: PartyWithoutCertificate,
                     progressTracker: ProgressTracker) : AbstractCashFlow(progressTracker) {
     constructor(amount: Amount<Currency>,
                 issueRef: OpaqueBytes,
-                recipient: Party,
-                notary: Party) : this(amount, issueRef, recipient, notary, tracker())
+                recipient: PartyWithoutCertificate,
+                notary: PartyWithoutCertificate) : this(amount, issueRef, recipient, notary, tracker())
 
     @Suspendable
     override fun call(): SignedTransaction {

@@ -1,6 +1,6 @@
 package net.corda.node.services.statemachine
 
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.flows.FlowLogic
 import net.corda.node.services.statemachine.FlowSessionState.Initiated
 import net.corda.node.services.statemachine.FlowSessionState.Initiating
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class FlowSession(
         val flow: FlowLogic<*>,
         val ourSessionId: Long,
-        val initiatingParty: Party?,
+        val initiatingParty: PartyWithoutCertificate?,
         var state: FlowSessionState,
         val retryable: Boolean = false) {
     val receivedMessages = ConcurrentLinkedQueue<ReceivedSessionMessage<*>>()
@@ -28,20 +28,20 @@ class FlowSession(
 /**
  * [FlowSessionState] describes the session's state.
  *
- * [Initiating] is pre-handshake. [Initiating.otherParty] at this point holds a [Party] corresponding to either a
+ * [Initiating] is pre-handshake. [Initiating.otherParty] at this point holds a [PartyWithoutCertificate] corresponding to either a
  *     specific peer or a service.
  * [Initiated] is post-handshake. At this point [Initiating.otherParty] will have been resolved to a specific peer
  *     [Initiated.peerParty], and the peer's sessionId has been initialised.
  */
 sealed class FlowSessionState {
-    abstract val sendToParty: Party
+    abstract val sendToParty: PartyWithoutCertificate
 
     /** [otherParty] may be a specific peer or a service party */
-    data class Initiating(val otherParty: Party) : FlowSessionState() {
-        override val sendToParty: Party get() = otherParty
+    data class Initiating(val otherParty: PartyWithoutCertificate) : FlowSessionState() {
+        override val sendToParty: PartyWithoutCertificate get() = otherParty
     }
 
-    data class Initiated(val peerParty: Party, val peerSessionId: Long) : FlowSessionState() {
-        override val sendToParty: Party get() = peerParty
+    data class Initiated(val peerParty: PartyWithoutCertificate, val peerSessionId: Long) : FlowSessionState() {
+        override val sendToParty: PartyWithoutCertificate get() = peerParty
     }
 }

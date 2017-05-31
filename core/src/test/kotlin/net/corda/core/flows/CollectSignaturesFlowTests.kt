@@ -6,8 +6,8 @@ import net.corda.core.contracts.DummyContract
 import net.corda.core.contracts.TransactionType
 import net.corda.core.contracts.requireThat
 import net.corda.core.getOrThrow
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.unwrap
 import net.corda.flows.CollectSignaturesFlow
@@ -26,7 +26,7 @@ class CollectSignaturesFlowTests {
     lateinit var a: MockNetwork.MockNode
     lateinit var b: MockNetwork.MockNode
     lateinit var c: MockNetwork.MockNode
-    lateinit var notary: Party
+    lateinit var notary: PartyWithoutCertificate
 
     @Before
     fun setup() {
@@ -55,7 +55,7 @@ class CollectSignaturesFlowTests {
     // "collectSignaturesFlow" and "SignTransactionFlow" can be used in practise.
     object TestFlow {
         @InitiatingFlow
-        class Initiator(val state: DummyContract.MultiOwnerState, val otherParty: PartyAndCertificate) : FlowLogic<SignedTransaction>() {
+        class Initiator(val state: DummyContract.MultiOwnerState, val otherParty: Party) : FlowLogic<SignedTransaction>() {
             @Suspendable
             override fun call(): SignedTransaction {
                 send(otherParty, state)
@@ -78,7 +78,7 @@ class CollectSignaturesFlowTests {
         }
 
         @InitiatedBy(TestFlow.Initiator::class)
-        class Responder(val otherParty: Party) : FlowLogic<SignedTransaction>() {
+        class Responder(val otherParty: PartyWithoutCertificate) : FlowLogic<SignedTransaction>() {
             @Suspendable
             override fun call(): SignedTransaction {
                 val state = receive<DummyContract.MultiOwnerState>(otherParty).unwrap { it }
@@ -115,7 +115,7 @@ class CollectSignaturesFlowTests {
         }
 
         @InitiatedBy(TestFlowTwo.Initiator::class)
-        class Responder(val otherParty: PartyAndCertificate) : FlowLogic<SignedTransaction>() {
+        class Responder(val otherParty: Party) : FlowLogic<SignedTransaction>() {
             @Suspendable override fun call(): SignedTransaction {
                 val flow = object : SignTransactionFlow(otherParty) {
                     @Suspendable override fun checkTransaction(stx: SignedTransaction) = requireThat {

@@ -3,6 +3,7 @@ package net.corda.testing
 import net.corda.core.contracts.*
 import net.corda.core.crypto.*
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.serialization.serialize
 import net.corda.core.transactions.SignedTransaction
@@ -115,7 +116,7 @@ data class TestTransactionDSLInterpreter private constructor(
         transactionBuilder.addInputState(StateAndRef(state, stateRef))
     }
 
-    override fun _output(label: String?, notary: Party, encumbrance: Int?, contractState: ContractState) {
+    override fun _output(label: String?, notary: PartyWithoutCertificate, encumbrance: Int?, contractState: ContractState) {
         val outputIndex = transactionBuilder.addOutputState(contractState, notary, encumbrance)
         if (label != null) {
             if (label in labelToIndexMap) {

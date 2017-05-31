@@ -9,7 +9,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.linearHeadsOfType
 import net.corda.core.serialization.CordaSerializable
@@ -51,13 +51,13 @@ data class TradeApprovalContract(override val legalContractReference: SecureHash
      * Truly minimal state that just records a tradeId string and the parties involved.
      */
     data class State(val tradeId: String,
-                     val source: Party,
-                     val counterparty: Party,
+                     val source: PartyWithoutCertificate,
+                     val counterparty: PartyWithoutCertificate,
                      val state: WorkflowState = WorkflowState.NEW,
                      override val linearId: UniqueIdentifier = UniqueIdentifier(tradeId),
                      override val contract: TradeApprovalContract = TradeApprovalContract()) : LinearState {
 
-        val parties: List<Party> get() = listOf(source, counterparty)
+        val parties: List<PartyWithoutCertificate> get() = listOf(source, counterparty)
         override val participants: List<AbstractParty> get() = parties
 
         override fun isRelevant(ourKeys: Set<PublicKey>): Boolean {
@@ -110,7 +110,7 @@ data class TradeApprovalContract(override val legalContractReference: SecureHash
  * as their approval/rejection is to follow.
  */
 class SubmitTradeApprovalFlow(val tradeId: String,
-                              val counterparty: Party) : FlowLogic<StateAndRef<TradeApprovalContract.State>>() {
+                              val counterparty: PartyWithoutCertificate) : FlowLogic<StateAndRef<TradeApprovalContract.State>>() {
     @Suspendable
     override fun call(): StateAndRef<TradeApprovalContract.State> {
         // Manufacture an initial state
@@ -219,7 +219,7 @@ class SubmitCompletionFlow(val ref: StateRef, val verdict: WorkflowState) : Flow
  * transaction to the ledger.
  */
 @InitiatedBy(SubmitCompletionFlow::class)
-class RecordCompletionFlow(val source: Party) : FlowLogic<Unit>() {
+class RecordCompletionFlow(val source: PartyWithoutCertificate) : FlowLogic<Unit>() {
     @Suspendable
     override fun call(): Unit {
         // DOCSTART 3

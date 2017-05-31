@@ -6,7 +6,7 @@ import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.getOrThrow
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.startFlow
 import net.corda.core.node.services.unconsumedStates
@@ -37,7 +37,7 @@ class ContractUpgradeFlowTest {
     lateinit var mockNet: MockNetwork
     lateinit var a: MockNetwork.MockNode
     lateinit var b: MockNetwork.MockNode
-    lateinit var notary: Party
+    lateinit var notary: PartyWithoutCertificate
 
     @Before
     fun setup() {
@@ -212,7 +212,7 @@ class ContractUpgradeFlowTest {
 
     @StartableByRPC
     class FinalityInvoker(val transaction: SignedTransaction,
-                          val extraRecipients: Set<Party>) : FlowLogic<List<SignedTransaction>>() {
+                          val extraRecipients: Set<PartyWithoutCertificate>) : FlowLogic<List<SignedTransaction>>() {
         @Suspendable
         override fun call(): List<SignedTransaction> = subFlow(FinalityFlow(transaction, extraRecipients))
     }

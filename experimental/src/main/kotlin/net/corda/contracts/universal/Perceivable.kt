@@ -2,7 +2,7 @@ package net.corda.contracts.universal
 
 import net.corda.core.contracts.BusinessCalendar
 import net.corda.core.contracts.Tenor
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import java.lang.reflect.Type
 import java.math.BigDecimal
@@ -78,10 +78,10 @@ class EndDate : Perceivable<Instant> {
     }
 }
 
-data class ActorPerceivable(val actor: Party) : Perceivable<Boolean>
-fun signedBy(actor: Party) : Perceivable<Boolean> = ActorPerceivable(actor)
+data class ActorPerceivable(val actor: PartyWithoutCertificate) : Perceivable<Boolean>
+fun signedBy(actor: PartyWithoutCertificate) : Perceivable<Boolean> = ActorPerceivable(actor)
 
-fun signedByOneOf(actors: Collection<Party>): Perceivable<Boolean> =
+fun signedByOneOf(actors: Collection<PartyWithoutCertificate>): Perceivable<Boolean> =
         if (actors.size == 0)
             const(true)
         else
@@ -153,7 +153,7 @@ operator fun Perceivable<BigDecimal>.div(n: Double) = PerceivableOperation(this,
 operator fun Perceivable<Int>.plus(n: Int) = PerceivableOperation(this, Operation.PLUS, const(n))
 operator fun Perceivable<Int>.minus(n: Int) = PerceivableOperation(this, Operation.MINUS, const(n))
 
-data class TerminalEvent(val reference: Party, val source: PublicKey) : Perceivable<Boolean>
+data class TerminalEvent(val reference: PartyWithoutCertificate, val source: PublicKey) : Perceivable<Boolean>
 
 // todo: holidays
 data class Interest(val amount: Perceivable<BigDecimal>, val dayCountConvention: String,

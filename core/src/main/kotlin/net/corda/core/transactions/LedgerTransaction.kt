@@ -2,7 +2,7 @@ package net.corda.core.transactions
 
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import java.security.PublicKey
 
@@ -30,7 +30,7 @@ class LedgerTransaction(
         val attachments: List<Attachment>,
         /** The hash of the original serialised WireTransaction. */
         override val id: SecureHash,
-        notary: Party?,
+        notary: PartyWithoutCertificate?,
         signers: List<PublicKey>,
         timeWindow: TimeWindow?,
         type: TransactionType

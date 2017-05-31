@@ -14,9 +14,8 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
-import net.corda.core.node.PluginServiceHub
 import net.corda.core.node.services.dealsWith
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
@@ -43,7 +42,7 @@ object SimmFlow {
      * portfolio update offer.
      */
     @CordaSerializable
-    data class OfferMessage(val notary: Party,
+    data class OfferMessage(val notary: PartyWithoutCertificate,
                             val dealBeingOffered: PortfolioState,
                             val stateRef: StateRef?,
                             val valuationDate: LocalDate)
@@ -54,14 +53,14 @@ object SimmFlow {
      */
     @InitiatingFlow
     @StartableByRPC
-    class Requester(val otherParty: Party,
+    class Requester(val otherParty: PartyWithoutCertificate,
                     val valuationDate: LocalDate,
                     val existing: StateAndRef<PortfolioState>?)
         : FlowLogic<RevisionedState<PortfolioState.Update>>() {
-        constructor(otherParty: Party, valuationDate: LocalDate) : this(otherParty, valuationDate, null)
+        constructor(otherParty: PartyWithoutCertificate, valuationDate: LocalDate) : this(otherParty, valuationDate, null)
 
-        lateinit var myIdentity: Party
-        lateinit var notary: Party
+        lateinit var myIdentity: PartyWithoutCertificate
+        lateinit var notary: PartyWithoutCertificate
 
         @Suspendable
         override fun call(): RevisionedState<PortfolioState.Update> {
@@ -116,7 +115,7 @@ object SimmFlow {
         }
 
         @Suspendable
-        private fun agreeValuation(portfolio: Portfolio, asOf: LocalDate, valuer: Party): PortfolioValuation {
+        private fun agreeValuation(portfolio: Portfolio, asOf: LocalDate, valuer: PartyWithoutCertificate): PortfolioValuation {
             // TODO: The attachments need to be added somewhere
             // TODO: handle failures
             val analyticsEngine = OGSIMMAnalyticsEngine()
@@ -186,8 +185,8 @@ object SimmFlow {
      * Receives and validates a portfolio and comes to consensus over the portfolio initial margin using SIMM.
      */
     @InitiatedBy(Requester::class)
-    class Receiver(val replyToParty: PartyAndCertificate) : FlowLogic<Unit>() {
-        lateinit var ownParty: Party
+    class Receiver(val replyToParty: Party) : FlowLogic<Unit>() {
+        lateinit var ownParty: PartyWithoutCertificate
         lateinit var offer: OfferMessage
 
         @Suspendable
@@ -235,7 +234,7 @@ object SimmFlow {
          * [ reference data is data such as calendars etc, market data is data such as current market price of ]
          */
         @Suspendable
-        private fun agreeValuation(portfolio: Portfolio, asOf: LocalDate, valuer: Party): PortfolioValuation {
+        private fun agreeValuation(portfolio: Portfolio, asOf: LocalDate, valuer: PartyWithoutCertificate): PortfolioValuation {
             // TODO: The attachments need to be added somewhere
             // TODO: handle failures
             val analyticsEngine = OGSIMMAnalyticsEngine()

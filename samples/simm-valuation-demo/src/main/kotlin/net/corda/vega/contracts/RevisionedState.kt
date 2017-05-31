@@ -2,7 +2,7 @@ package net.corda.vega.contracts
 
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.StateAndRef
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.TransactionBuilder
 
 /**
@@ -11,5 +11,5 @@ import net.corda.core.transactions.TransactionBuilder
  * functional sense) however it can be amended and then re-written as another state into the ledger.
  */
 interface RevisionedState<in T> : ContractState {
-    fun generateRevision(notary: Party, oldState: StateAndRef<*>, updatedValue: T): TransactionBuilder
+    fun generateRevision(notary: PartyWithoutCertificate, oldState: StateAndRef<*>, updatedValue: T): TransactionBuilder
 }

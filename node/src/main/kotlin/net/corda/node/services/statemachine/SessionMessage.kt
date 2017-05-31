@@ -3,7 +3,7 @@ package net.corda.node.services.statemachine
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSessionException
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.utilities.UntrustworthyData
 
@@ -39,7 +39,7 @@ interface SessionEnd : ExistingSessionMessage
 data class NormalSessionEnd(override val recipientSessionId: Long) : SessionEnd
 data class ErrorSessionEnd(override val recipientSessionId: Long, val errorResponse: FlowException?) : SessionEnd
 
-data class ReceivedSessionMessage<out M : ExistingSessionMessage>(val sender: Party, val message: M)
+data class ReceivedSessionMessage<out M : ExistingSessionMessage>(val sender: PartyWithoutCertificate, val message: M)
 
 fun <T> ReceivedSessionMessage<SessionData>.checkPayloadIs(type: Class<T>): UntrustworthyData<T> {
     if (type.isInstance(message.payload)) {

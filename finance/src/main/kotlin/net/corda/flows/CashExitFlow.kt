@@ -7,7 +7,7 @@ import net.corda.core.contracts.InsufficientBalanceException
 import net.corda.core.contracts.TransactionType
 import net.corda.core.contracts.issuedBy
 import net.corda.core.flows.StartableByRPC
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.OpaqueBytes
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
@@ -55,7 +55,7 @@ class CashExitFlow(val amount: Amount<Currency>, val issueRef: OpaqueBytes, prog
 
         // TODO: Is it safe to drop participants we don't know how to contact? Does not knowing how to contact them
         //       count as a reason to fail?
-        val participants: Set<Party> = inputStates
+        val participants: Set<PartyWithoutCertificate> = inputStates
                 .filterIsInstance<Cash.State>()
                 .map { serviceHub.identityService.partyFromAnonymous(it.owner) }
                 .filterNotNull()

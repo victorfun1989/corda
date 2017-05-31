@@ -10,7 +10,7 @@ import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.messaging.startFlow
 import net.corda.core.utilities.ALICE
 import net.corda.core.utilities.BOB
@@ -66,17 +66,17 @@ class CordappScanningTest {
 
     @StartableByRPC
     @InitiatingFlow
-    class ReceiveFlow(val otherParty: Party) : FlowLogic<String>() {
+    class ReceiveFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<String>() {
         @Suspendable
         override fun call(): String = receive<String>(otherParty).unwrap { it }
     }
 
     @InitiatedBy(ReceiveFlow::class)
-    open class SendClassFlow(val otherParty: Party) : FlowLogic<Unit>() {
+    open class SendClassFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() = send(otherParty, javaClass.name)
     }
 
     @InitiatedBy(ReceiveFlow::class)
-    class SendSubClassFlow(otherParty: Party) : SendClassFlow(otherParty)
+    class SendSubClassFlow(otherParty: PartyWithoutCertificate) : SendClassFlow(otherParty)
 }

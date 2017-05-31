@@ -1,7 +1,7 @@
 package net.corda.flows
 
 import net.corda.core.contracts.Amount
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.FlowHandle
 import net.corda.core.messaging.startFlow
@@ -20,8 +20,8 @@ sealed class CashFlowCommand {
      */
     data class IssueCash(val amount: Amount<Currency>,
                          val issueRef: OpaqueBytes,
-                         val recipient: Party,
-                         val notary: Party) : CashFlowCommand() {
+                         val recipient: PartyWithoutCertificate,
+                         val notary: PartyWithoutCertificate) : CashFlowCommand() {
         override fun startFlow(proxy: CordaRPCOps) = proxy.startFlow(::CashIssueFlow, amount, issueRef, recipient, notary)
     }
 
@@ -31,7 +31,7 @@ sealed class CashFlowCommand {
      * @param amount the amount of currency to issue on to the ledger.
      * @param recipient the party to issue the cash to.
      */
-    data class PayCash(val amount: Amount<Currency>, val recipient: Party, val issuerConstraint: Party? = null) : CashFlowCommand() {
+    data class PayCash(val amount: Amount<Currency>, val recipient: PartyWithoutCertificate, val issuerConstraint: PartyWithoutCertificate? = null) : CashFlowCommand() {
         override fun startFlow(proxy: CordaRPCOps) = proxy.startFlow(::CashPaymentFlow, amount, recipient)
     }
 

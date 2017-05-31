@@ -5,7 +5,7 @@ import net.corda.core.crypto.MerkleTree
 import net.corda.core.crypto.MerkleTreeException
 import net.corda.core.crypto.PartialMerkleTree
 import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.serialization.p2PKryo
 import net.corda.core.serialization.serialize
@@ -30,7 +30,7 @@ interface TraversableTransaction {
     val attachments: List<SecureHash>
     val outputs: List<TransactionState<ContractState>>
     val commands: List<Command>
-    val notary: Party?
+    val notary: PartyWithoutCertificate?
     val mustSign: List<PublicKey>
     val type: TransactionType?
     val timeWindow: TimeWindow?
@@ -42,7 +42,7 @@ interface TraversableTransaction {
      * - Each attachment that is present
      * - Each output that is present
      * - Each command that is present
-     * - The notary [Party], if present
+     * - The notary party, if present
      * - Each required signer ([mustSign]) that is present
      * - The type of the transaction, if present
      * - The time-window of the transaction, if present
@@ -78,7 +78,7 @@ class FilteredLeaves(
         override val attachments: List<SecureHash>,
         override val outputs: List<TransactionState<ContractState>>,
         override val commands: List<Command>,
-        override val notary: Party?,
+        override val notary: PartyWithoutCertificate?,
         override val mustSign: List<PublicKey>,
         override val type: TransactionType?,
         override val timeWindow: TimeWindow?

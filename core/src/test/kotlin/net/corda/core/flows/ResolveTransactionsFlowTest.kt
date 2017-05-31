@@ -4,7 +4,7 @@ import net.corda.core.contracts.DummyContract
 import net.corda.core.crypto.NullSignature
 import net.corda.core.crypto.SecureHash
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.opaque
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.DUMMY_NOTARY_KEY
@@ -31,7 +31,7 @@ class ResolveTransactionsFlowTest {
     lateinit var net: MockNetwork
     lateinit var a: MockNetwork.MockNode
     lateinit var b: MockNetwork.MockNode
-    lateinit var notary: Party
+    lateinit var notary: PartyWithoutCertificate
 
     @Before
     fun setup() {

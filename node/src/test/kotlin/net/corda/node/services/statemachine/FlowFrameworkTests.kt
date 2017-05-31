@@ -13,8 +13,8 @@ import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSessionException
 import net.corda.core.flows.InitiatingFlow
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.messaging.MessageRecipients
 import net.corda.core.node.services.PartyInfo
 import net.corda.core.node.services.ServiceInfo
@@ -503,7 +503,7 @@ class FlowFrameworkTests {
         )
     }
 
-    private class ConditionalExceptionFlow(val otherParty: Party, val sendPayload: Any) : FlowLogic<Unit>() {
+    private class ConditionalExceptionFlow(val otherParty: PartyWithoutCertificate, val sendPayload: Any) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             val throwException = receive<Boolean>(otherParty).unwrap { it }
@@ -517,12 +517,12 @@ class FlowFrameworkTests {
     @Test
     fun `retry subFlow due to receiving FlowException`() {
         @InitiatingFlow
-        class AskForExceptionFlow(val otherParty: Party, val throwException: Boolean) : FlowLogic<String>() {
+        class AskForExceptionFlow(val otherParty: PartyWithoutCertificate, val throwException: Boolean) : FlowLogic<String>() {
             @Suspendable
             override fun call(): String = sendAndReceive<String>(otherParty, throwException).unwrap { it }
         }
 
-        class RetryOnExceptionFlow(val otherParty: Party) : FlowLogic<String>() {
+        class RetryOnExceptionFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<String>() {
             @Suspendable
             override fun call(): String {
                 return try {
@@ -674,10 +674,10 @@ class FlowFrameworkTests {
 
     private inline fun <reified P : FlowLogic<*>> MockNode.registerFlowFactory(
         initiatingFlowClass: KClass<out FlowLogic<*>>,
-        noinline flowFactory: (PartyAndCertificate) -> P): ListenableFuture<P>
+        noinline flowFactory: (Party) -> P): ListenableFuture<P>
     {
         val observable = registerFlowFactory(initiatingFlowClass.java, object : InitiatedFlowFactory<P> {
-            override fun createFlow(platformVersion: Int, otherParty: PartyAndCertificate, sessionInit: SessionInit): P {
+            override fun createFlow(platformVersion: Int, otherParty: Party, sessionInit: SessionInit): P {
                 return flowFactory(otherParty)
             }
         }, P::class.java, track = true)
@@ -750,7 +750,7 @@ class FlowFrameworkTests {
 
 
     @InitiatingFlow
-    private open class SendFlow(val payload: Any, vararg val otherParties: Party) : FlowLogic<Unit>() {
+    private open class SendFlow(val payload: Any, vararg val otherParties: PartyWithoutCertificate) : FlowLogic<Unit>() {
         init {
             require(otherParties.isNotEmpty())
         }
@@ -761,13 +761,13 @@ class FlowFrameworkTests {
 
     private interface CustomInterface
 
-    private class CustomSendFlow(payload: String, otherParty: Party) : CustomInterface, SendFlow(payload, otherParty)
+    private class CustomSendFlow(payload: String, otherParty: PartyWithoutCertificate) : CustomInterface, SendFlow(payload, otherParty)
 
     @InitiatingFlow
-    private class IncorrectCustomSendFlow(payload: String, otherParty: Party) : CustomInterface, SendFlow(payload, otherParty)
+    private class IncorrectCustomSendFlow(payload: String, otherParty: PartyWithoutCertificate) : CustomInterface, SendFlow(payload, otherParty)
 
     @InitiatingFlow
-    private class ReceiveFlow(vararg val otherParties: Party) : FlowLogic<Unit>() {
+    private class ReceiveFlow(vararg val otherParties: PartyWithoutCertificate) : FlowLogic<Unit>() {
         object START_STEP : ProgressTracker.Step("Starting")
         object RECEIVED_STEP : ProgressTracker.Step("Received")
 
@@ -796,18 +796,18 @@ class FlowFrameworkTests {
     }
 
     @InitiatingFlow
-    private class SendAndReceiveFlow(val otherParty: Party, val payload: Any) : FlowLogic<Any>() {
+    private class SendAndReceiveFlow(val otherParty: PartyWithoutCertificate, val payload: Any) : FlowLogic<Any>() {
         @Suspendable
         override fun call(): Any = sendAndReceive<Any>(otherParty, payload).unwrap { it }
     }
 
-    private class InlinedSendFlow(val payload: String, val otherParty: Party) : FlowLogic<Unit>() {
+    private class InlinedSendFlow(val payload: String, val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() = send(otherParty, payload)
     }
 
     @InitiatingFlow
-    private class PingPongFlow(val otherParty: Party, val payload: Long) : FlowLogic<Unit>() {
+    private class PingPongFlow(val otherParty: PartyWithoutCertificate, val payload: Long) : FlowLogic<Unit>() {
         @Transient var receivedPayload: Long? = null
         @Transient var receivedPayload2: Long? = null
 
@@ -838,7 +838,7 @@ class FlowFrameworkTests {
 
     private object WaitingFlows {
         @InitiatingFlow
-        class Waiter(val stx: SignedTransaction, val otherParty: Party) : FlowLogic<SignedTransaction>() {
+        class Waiter(val stx: SignedTransaction, val otherParty: PartyWithoutCertificate) : FlowLogic<SignedTransaction>() {
             @Suspendable
             override fun call(): SignedTransaction {
                 send(otherParty, stx)
@@ -846,7 +846,7 @@ class FlowFrameworkTests {
             }
         }
 
-        class Committer(val otherParty: Party, val throwException: (() -> Exception)? = null) : FlowLogic<SignedTransaction>() {
+        class Committer(val otherParty: PartyWithoutCertificate, val throwException: (() -> Exception)? = null) : FlowLogic<SignedTransaction>() {
             @Suspendable
             override fun call(): SignedTransaction {
                 val stx = receive<SignedTransaction>(otherParty).unwrap { it }
@@ -865,12 +865,12 @@ class FlowFrameworkTests {
     }
 
     @InitiatingFlow(version = 2)
-    private class UpgradedFlow(val otherParty: Party) : FlowLogic<Any>() {
+    private class UpgradedFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<Any>() {
         @Suspendable
         override fun call(): Any = receive<Any>(otherParty).unwrap { it }
     }
 
-    private class SingleInlinedSubFlow(val otherParty: Party) : FlowLogic<Unit>() {
+    private class SingleInlinedSubFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             val payload = receive<String>(otherParty).unwrap { it }
@@ -878,7 +878,7 @@ class FlowFrameworkTests {
         }
     }
 
-    private class DoubleInlinedSubFlow(val otherParty: Party) : FlowLogic<Unit>() {
+    private class DoubleInlinedSubFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             subFlow(SingleInlinedSubFlow(otherParty))

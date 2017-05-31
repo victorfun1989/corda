@@ -1,7 +1,7 @@
 package net.corda.core.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
-import net.corda.core.identity.Party;
+import net.corda.core.identity.PartyWithoutCertificate;
 import net.corda.testing.node.MockNetwork;
 import org.junit.After;
 import org.junit.Before;
@@ -40,9 +40,9 @@ public class FlowsInJavaTest {
 
     @InitiatingFlow
     private static class SendInUnwrapFlow extends FlowLogic<String> {
-        private final Party otherParty;
+        private final PartyWithoutCertificate otherParty;
 
-        private SendInUnwrapFlow(Party otherParty) {
+        private SendInUnwrapFlow(PartyWithoutCertificate otherParty) {
             this.otherParty = otherParty;
         }
 
@@ -58,9 +58,9 @@ public class FlowsInJavaTest {
 
     @InitiatedBy(SendInUnwrapFlow.class)
     private static class SendHelloAndThenReceive extends FlowLogic<String> {
-        private final Party otherParty;
+        private final PartyWithoutCertificate otherParty;
 
-        private SendHelloAndThenReceive(Party otherParty) {
+        private SendHelloAndThenReceive(PartyWithoutCertificate otherParty) {
             this.otherParty = otherParty;
         }
 

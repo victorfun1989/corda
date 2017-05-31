@@ -17,8 +17,8 @@ import io.requery.util.CloseableIterator
 import net.corda.core.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.*
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.serialization.*
 import net.corda.core.utilities.debug
 import net.corda.core.utilities.loggerFor
@@ -144,7 +144,7 @@ class StateMachineManager(val serviceHub: ServiceHubInternal,
     private val totalFinishedFlows = metrics.counter("Flows.Finished")
 
     private val openSessions = ConcurrentHashMap<Long, FlowSession>()
-    private val recentlyClosedSessions = ConcurrentHashMap<Long, Party>()
+    private val recentlyClosedSessions = ConcurrentHashMap<Long, PartyWithoutCertificate>()
 
     // Context for tokenized services in checkpoints
     private lateinit var serializationContext: SerializeAsTokenContext
@@ -292,7 +292,7 @@ class StateMachineManager(val serviceHub: ServiceHubInternal,
         }
     }
 
-    private fun onExistingSessionMessage(message: ExistingSessionMessage, sender: Party) {
+    private fun onExistingSessionMessage(message: ExistingSessionMessage, sender: PartyWithoutCertificate) {
         val session = openSessions[message.recipientSessionId]
         if (session != null) {
             session.fiber.logger.trace { "Received $message on $session from $sender" }
@@ -340,7 +340,7 @@ class StateMachineManager(val serviceHub: ServiceHubInternal,
                 waitingForResponse is WaitForLedgerCommit && message is ErrorSessionEnd
     }
 
-    private fun onSessionInit(sessionInit: SessionInit, receivedMessage: ReceivedMessage, sender: PartyAndCertificate) {
+    private fun onSessionInit(sessionInit: SessionInit, receivedMessage: ReceivedMessage, sender: Party) {
         logger.trace { "Received $sessionInit from $sender" }
         val otherPartySessionId = sessionInit.initiatorSessionId
 
@@ -558,7 +558,7 @@ class StateMachineManager(val serviceHub: ServiceHubInternal,
         }
     }
 
-    private fun sendSessionMessage(party: Party, message: SessionMessage, fiber: FlowStateMachineImpl<*>? = null, retryId: Long? = null) {
+    private fun sendSessionMessage(party: PartyWithoutCertificate, message: SessionMessage, fiber: FlowStateMachineImpl<*>? = null, retryId: Long? = null) {
         val partyInfo = serviceHub.networkMapCache.getPartyInfo(party)
                 ?: throw IllegalArgumentException("Don't know about party $party")
         val address = serviceHub.networkService.getAddressOfParty(partyInfo)

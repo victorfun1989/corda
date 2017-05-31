@@ -4,7 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.contracts.Fix
 import net.corda.core.contracts.FixOf
 import net.corda.core.crypto.DigitalSignature
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.serialization.CordaSerializable
@@ -29,7 +29,7 @@ import java.util.*
  * @throws FixOutOfRange if the returned fix was further away from the expected rate by the given amount.
  */
 open class RatesFixFlow(protected val tx: TransactionBuilder,
-                        protected val oracle: Party,
+                        protected val oracle: PartyWithoutCertificate,
                         protected val fixOf: FixOf,
                         protected val expectedRate: BigDecimal,
                         protected val rateTolerance: BigDecimal,
@@ -95,7 +95,7 @@ open class RatesFixFlow(protected val tx: TransactionBuilder,
 
     // DOCSTART 1
     @InitiatingFlow
-    class FixQueryFlow(val fixOf: FixOf, val oracle: Party) : FlowLogic<Fix>() {
+    class FixQueryFlow(val fixOf: FixOf, val oracle: PartyWithoutCertificate) : FlowLogic<Fix>() {
         @Suspendable
         override fun call(): Fix {
             val deadline = suggestInterestRateAnnouncementTimeWindow(fixOf.name, oracle.name.toString(), fixOf.forDay).end
@@ -112,7 +112,7 @@ open class RatesFixFlow(protected val tx: TransactionBuilder,
     }
 
     @InitiatingFlow
-    class FixSignFlow(val tx: TransactionBuilder, val oracle: Party,
+    class FixSignFlow(val tx: TransactionBuilder, val oracle: PartyWithoutCertificate,
                       val partialMerkleTx: FilteredTransaction) : FlowLogic<DigitalSignature.LegallyIdentifiable>() {
         @Suspendable
         override fun call(): DigitalSignature.LegallyIdentifiable {

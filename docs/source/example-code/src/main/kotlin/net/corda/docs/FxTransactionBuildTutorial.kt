@@ -11,9 +11,8 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
-import net.corda.core.node.PluginServiceHub
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.unconsumedStates
 import net.corda.core.serialization.CordaSerializable
@@ -26,9 +25,9 @@ import java.util.*
 @CordaSerializable
 private data class FxRequest(val tradeId: String,
                              val amount: Amount<Issued<Currency>>,
-                             val owner: PartyAndCertificate,
-                             val counterparty: PartyAndCertificate,
-                             val notary: Party? = null)
+                             val owner: Party,
+                             val counterparty: Party,
+                             val notary: PartyWithoutCertificate? = null)
 
 @CordaSerializable
 private data class FxResponse(val inputs: List<StateAndRef<Cash.State>>,
@@ -39,7 +38,7 @@ private data class FxResponse(val inputs: List<StateAndRef<Cash.State>>,
 // Which is brought here to make the filtering logic more visible in the example
 private fun gatherOurInputs(serviceHub: ServiceHub,
                             amountRequired: Amount<Issued<Currency>>,
-                            notary: Party?): Pair<List<StateAndRef<Cash.State>>, Long> {
+                            notary: PartyWithoutCertificate?): Pair<List<StateAndRef<Cash.State>>, Long> {
     // Collect cash type inputs
     val cashStates = serviceHub.vaultService.unconsumedStates<Cash.State>()
     // extract our identity for convenience
@@ -56,7 +55,7 @@ private fun gatherOurInputs(serviceHub: ServiceHub,
     // For simplicity we just filter on the first notary encountered
     // A production quality flow would need to migrate notary if the
     // the amounts were not sufficient in any one notary
-    val sourceNotary: Party = notary ?: suitableCashStates.first().state.notary
+    val sourceNotary: PartyWithoutCertificate = notary ?: suitableCashStates.first().state.notary
 
     val inputsList = mutableListOf<StateAndRef<Cash.State>>()
     // Iterate over filtered cash states to gather enough to pay
@@ -103,8 +102,8 @@ private fun prepareOurInputsAndOutputs(serviceHub: ServiceHub, request: FxReques
 class ForeignExchangeFlow(val tradeId: String,
                           val baseCurrencyAmount: Amount<Issued<Currency>>,
                           val quoteCurrencyAmount: Amount<Issued<Currency>>,
-                          val baseCurrencyBuyer: PartyAndCertificate,
-                          val baseCurrencySeller: PartyAndCertificate) : FlowLogic<SecureHash>() {
+                          val baseCurrencyBuyer: Party,
+                          val baseCurrencySeller: Party) : FlowLogic<SecureHash>() {
     @Suspendable
     override fun call(): SecureHash {
         // Select correct sides of the Fx exchange to query for.
@@ -208,7 +207,7 @@ class ForeignExchangeFlow(val tradeId: String,
 }
 
 @InitiatedBy(ForeignExchangeFlow::class)
-class ForeignExchangeRemoteFlow(val source: PartyAndCertificate) : FlowLogic<Unit>() {
+class ForeignExchangeRemoteFlow(val source: Party) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         // Initial receive from remote party

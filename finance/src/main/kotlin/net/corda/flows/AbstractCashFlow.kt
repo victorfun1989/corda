@@ -3,7 +3,7 @@ package net.corda.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
 
@@ -20,7 +20,7 @@ abstract class AbstractCashFlow(override val progressTracker: ProgressTracker) :
     }
 
     @Suspendable
-    internal fun finaliseTx(participants: Set<Party>, tx: SignedTransaction, message: String) {
+    internal fun finaliseTx(participants: Set<PartyWithoutCertificate>, tx: SignedTransaction, message: String) {
         try {
             subFlow(FinalityFlow(tx, participants))
         } catch (e: NotaryException) {

@@ -2,7 +2,7 @@ package net.corda.vega.api
 
 import com.opengamma.strata.basics.currency.MultiCurrencyAmount
 import com.opengamma.strata.product.common.BuySell
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.vega.analytics.InitialMarginTriple
 import net.corda.vega.contracts.SwapData
 import net.corda.vega.portfolio.Portfolio
@@ -26,7 +26,7 @@ data class SwapDataView(
         var margined: Boolean = false,
         var marginedText: String = "❌️")
 
-fun SwapData.toView(viewingParty: Party, portfolio: Portfolio? = null,
+fun SwapData.toView(viewingParty: PartyWithoutCertificate, portfolio: Portfolio? = null,
                     presentValue: MultiCurrencyAmount? = null,
                     IM: InitialMarginTriple? = null): SwapDataView {
     val isBuyer = viewingParty.owningKey == buyer.second

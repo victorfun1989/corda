@@ -3,8 +3,8 @@ package net.corda.core.node.services
 import net.corda.core.contracts.PartyAndReference
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.AnonymousParty
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import org.bouncycastle.asn1.x500.X500Name
 import java.security.InvalidAlgorithmParameterException
 import java.security.PublicKey
@@ -26,7 +26,7 @@ interface IdentityService {
      * certificate chain for the anonymous party.
      */
     @Throws(CertificateExpiredException::class, CertificateNotYetValidException::class, InvalidAlgorithmParameterException::class)
-    fun registerIdentity(party: PartyAndCertificate)
+    fun registerIdentity(party: Party)
 
     /**
      * Verify and then store an identity.
@@ -37,7 +37,7 @@ interface IdentityService {
      * certificate chain for the anonymous party.
      */
     @Throws(CertificateExpiredException::class, CertificateNotYetValidException::class, InvalidAlgorithmParameterException::class)
-    fun registerAnonymousIdentity(anonymousParty: AnonymousParty, fullParty: PartyAndCertificate, path: CertPath)
+    fun registerAnonymousIdentity(anonymousParty: AnonymousParty, fullParty: Party, path: CertPath)
 
     /**
      * Asserts that an anonymous party maps to the given full party, by looking up the certificate chain associated with
@@ -46,7 +46,7 @@ interface IdentityService {
      * @throws IllegalStateException if the anonymous party is not owned by the full party.
      */
     @Throws(IllegalStateException::class)
-    fun assertOwnership(party: Party, anonymousParty: AnonymousParty)
+    fun assertOwnership(party: PartyWithoutCertificate, anonymousParty: AnonymousParty)
 
     /**
      * Get all identities known to the service. This is expensive, and [partyFromKey] or [partyFromX500Name] should be
@@ -58,10 +58,10 @@ interface IdentityService {
     // indefinitely. It may be that in the long term we need to drop or archive very old Party information for space,
     // but for now this is not supported.
 
-    fun partyFromKey(key: PublicKey): PartyAndCertificate?
+    fun partyFromKey(key: PublicKey): Party?
     @Deprecated("Use partyFromX500Name")
-    fun partyFromName(name: String): PartyAndCertificate?
-    fun partyFromX500Name(principal: X500Name): PartyAndCertificate?
+    fun partyFromName(name: String): Party?
+    fun partyFromX500Name(principal: X500Name): Party?
 
     /**
      * Resolve the well known identity of a party. If the party passed in is already a well known identity
@@ -69,7 +69,7 @@ interface IdentityService {
      *
      * @return the well known identity, or null if unknown.
      */
-    fun partyFromAnonymous(party: AbstractParty): PartyAndCertificate?
+    fun partyFromAnonymous(party: AbstractParty): Party?
 
     /**
      * Resolve the well known identity of a party. If the party passed in is already a well known identity

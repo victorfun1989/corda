@@ -4,7 +4,7 @@ import co.paralleluniverse.strands.Strand
 import net.corda.core.contracts.*
 import net.corda.core.crypto.*
 import net.corda.core.flows.FlowStateMachine
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.serialize
 import java.security.KeyPair
 import java.security.PublicKey
@@ -30,7 +30,7 @@ import java.util.*
  */
 open class TransactionBuilder(
         protected val type: TransactionType = TransactionType.General,
-        var notary: Party? = null,
+        var notary: PartyWithoutCertificate? = null,
         var lockId: UUID = (Strand.currentStrand() as? FlowStateMachine<*>)?.id?.uuid ?: UUID.randomUUID(),
         protected val inputs: MutableList<StateRef> = arrayListOf(),
         protected val attachments: MutableList<SecureHash> = arrayListOf(),
@@ -165,7 +165,7 @@ open class TransactionBuilder(
     }
 
     @JvmOverloads
-    fun addOutputState(state: ContractState, notary: Party, encumbrance: Int? = null) = addOutputState(TransactionState(state, notary, encumbrance))
+    fun addOutputState(state: ContractState, notary: PartyWithoutCertificate, encumbrance: Int? = null) = addOutputState(TransactionState(state, notary, encumbrance))
 
     /** A default notary must be specified during builder construction to use this method */
     fun addOutputState(state: ContractState): Int {

@@ -9,8 +9,8 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.keys
 import net.corda.core.flows.FlowException
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.Sort
@@ -21,7 +21,6 @@ import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.transactions.WireTransaction
 import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.operator.ContentSigner
 import rx.Observable
 import java.io.InputStream
 import java.security.PublicKey
@@ -344,7 +343,7 @@ interface VaultService {
      * is implemented in a separate module (finance) and requires access to it.
      */
     @Suspendable
-    fun <T : ContractState> unconsumedStatesForSpending(amount: Amount<Currency>, onlyFromIssuerParties: Set<AbstractParty>? = null, notary: Party? = null, lockId: UUID, withIssuerRefs: Set<OpaqueBytes>? = null): List<StateAndRef<T>>
+    fun <T : ContractState> unconsumedStatesForSpending(amount: Amount<Currency>, onlyFromIssuerParties: Set<AbstractParty>? = null, notary: PartyWithoutCertificate? = null, lockId: UUID, withIssuerRefs: Set<OpaqueBytes>? = null): List<StateAndRef<T>>
 }
 
 // TODO: Remove this from the interface
@@ -401,7 +400,7 @@ interface KeyManagementService {
      * @return X.509 certificate and path to the trust root.
      */
     @Suspendable
-    fun freshKeyAndCert(identity: PartyAndCertificate, revocationEnabled: Boolean): Pair<X509CertificateHolder, CertPath>
+    fun freshKeyAndCert(identity: Party, revocationEnabled: Boolean): Pair<X509CertificateHolder, CertPath>
 
     /** Using the provided signing [PublicKey] internally looks up the matching [PrivateKey] and signs the data.
      * @param bytes The data to sign over using the chosen key.

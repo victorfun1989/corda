@@ -7,7 +7,7 @@ import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.flows.TwoPartyDealFlow
@@ -69,5 +69,5 @@ object AutoOfferFlow {
     }
 
     @InitiatedBy(Requester::class)
-    class AutoOfferAcceptor(otherParty: Party) : Acceptor(otherParty)
+    class AutoOfferAcceptor(otherParty: PartyWithoutCertificate) : Acceptor(otherParty)
 }

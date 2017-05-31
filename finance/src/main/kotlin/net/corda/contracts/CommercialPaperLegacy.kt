@@ -6,7 +6,7 @@ import net.corda.core.contracts.*
 import net.corda.core.crypto.NULL_PARTY
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.VaultService
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.Emoji
@@ -113,7 +113,7 @@ class CommercialPaperLegacy : Contract {
     }
 
     fun generateIssue(issuance: PartyAndReference, faceValue: Amount<Issued<Currency>>, maturityDate: Instant,
-                      notary: Party): TransactionBuilder {
+                      notary: PartyWithoutCertificate): TransactionBuilder {
         val state = State(issuance, issuance.party, faceValue, maturityDate)
         return TransactionBuilder(notary = notary).withItems(state, Command(Commands.Issue(), issuance.party.owningKey))
     }

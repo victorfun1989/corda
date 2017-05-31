@@ -3,6 +3,7 @@ package net.corda.core.contracts
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.TransactionBuilder
 
 // The dummy contract doesn't do anything useful. It exists for testing purposes.
@@ -44,7 +45,7 @@ data class DummyContract(override val legalContractReference: SecureHash = Secur
 
     companion object {
         @JvmStatic
-        fun generateInitial(magicNumber: Int, notary: Party, owner: PartyAndReference, vararg otherOwners: PartyAndReference): TransactionBuilder {
+        fun generateInitial(magicNumber: Int, notary: PartyWithoutCertificate, owner: PartyAndReference, vararg otherOwners: PartyAndReference): TransactionBuilder {
             val owners = listOf(owner) + otherOwners
             return if (owners.size == 1) {
                 val state = SingleOwnerState(magicNumber, owners.first().party)

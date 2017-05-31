@@ -3,6 +3,7 @@ package net.corda.core.node.services
 import com.google.common.util.concurrent.ListenableFuture
 import net.corda.core.contracts.Contract
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.NodeInfo
 import net.corda.core.randomOrNull
 import net.corda.core.serialization.CordaSerializable
@@ -80,7 +81,7 @@ interface NetworkMapCache {
     }
 
     /** Returns information about the party, which may be a specific node or a service */
-    fun getPartyInfo(party: Party): PartyInfo?
+    fun getPartyInfo(party: PartyWithoutCertificate): PartyInfo?
 
     /** Gets a notary identity by the given name. */
     fun getNotary(principal: X500Name): Party? {
@@ -110,7 +111,7 @@ interface NetworkMapCache {
     fun isNotary(party: Party): Boolean = notaryNodes.any { it.notaryIdentity == party }
 
     /** Checks whether a given party is an advertised validating notary identity */
-    fun isValidatingNotary(party: Party): Boolean {
+    fun isValidatingNotary(party: PartyWithoutCertificate): Boolean {
         val notary = notaryNodes.firstOrNull { it.notaryIdentity == party }
                 ?: throw IllegalArgumentException("No notary found with identity $party. This is most likely caused " +
                 "by using the notary node's legal identity instead of its advertised notary identity. " +

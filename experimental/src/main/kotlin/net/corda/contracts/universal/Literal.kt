@@ -2,7 +2,7 @@ package net.corda.contracts.universal
 
 import net.corda.core.contracts.BusinessCalendar
 import net.corda.core.contracts.Frequency
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -23,14 +23,14 @@ class ActionsBuilder {
             else
                 Actions(actions.toSet())
 
-    infix fun Party.may(init: ActionBuilder.() -> Action): Action {
+    infix fun PartyWithoutCertificate.may(init: ActionBuilder.() -> Action): Action {
         val builder = ActionBuilder(setOf(this))
         builder.init()
         actions.addAll(builder.actions)
         return builder.actions.first()
     }
 
-    infix fun Set<Party>.may(init: ActionBuilder.() -> Action): Action {
+    infix fun Set<PartyWithoutCertificate>.may(init: ActionBuilder.() -> Action): Action {
         val builder = ActionBuilder(this)
         builder.init()
         actions.addAll(builder.actions)
@@ -38,8 +38,8 @@ class ActionsBuilder {
         return builder.actions.first()
     }
 
-    infix fun Party.or(party: Party) = setOf(this, party)
-    infix fun Set<Party>.or(party: Party) = this.plus(party)
+    infix fun PartyWithoutCertificate.or(party: PartyWithoutCertificate) = setOf(this, party)
+    infix fun Set<PartyWithoutCertificate>.or(party: PartyWithoutCertificate) = this.plus(party)
 
     fun String.givenThat(condition: Perceivable<Boolean>, init: ContractBuilder.() -> Arrangement): Action {
         val b = ContractBuilder()
@@ -67,13 +67,13 @@ open class ContractBuilder {
         return c
     }
 
-    fun Party.owes(beneficiary: Party, amount: BigDecimal, currency: Currency): Obligation {
+    fun PartyWithoutCertificate.owes(beneficiary: PartyWithoutCertificate, amount: BigDecimal, currency: Currency): Obligation {
         val c = Obligation(const(amount), currency, this, beneficiary)
         contracts.add(c)
         return c
     }
 
-    fun Party.owes(beneficiary: Party, amount: Perceivable<BigDecimal>, currency: Currency): Obligation {
+    fun PartyWithoutCertificate.owes(beneficiary: PartyWithoutCertificate, amount: Perceivable<BigDecimal>, currency: Currency): Obligation {
         val c = Obligation(amount, currency, this, beneficiary)
         contracts.add(c)
         return c
@@ -81,7 +81,7 @@ open class ContractBuilder {
 
     @Deprecated(level = DeprecationLevel.ERROR, message = "Not allowed")
     fun Action(@Suppress("UNUSED_PARAMETER") name: String, @Suppress("UNUSED_PARAMETER") condition: Perceivable<Boolean>,
-               @Suppress("UNUSED_PARAMETER") actors: Set<Party>, @Suppress("UNUSED_PARAMETER") arrangement: Arrangement) {
+               @Suppress("UNUSED_PARAMETER") actors: Set<PartyWithoutCertificate>, @Suppress("UNUSED_PARAMETER") arrangement: Arrangement) {
     }
 
     @Deprecated(level = DeprecationLevel.ERROR, message = "Not available")
@@ -97,11 +97,11 @@ open class ContractBuilder {
     }
 
     @Deprecated(level = DeprecationLevel.ERROR, message = "Not available")
-    fun Party.may(init: ActionBuilder.() -> Action) {
+    fun PartyWithoutCertificate.may(init: ActionBuilder.() -> Action) {
     }
 
     @Deprecated(level = DeprecationLevel.ERROR, message = "Not available")
-    fun Set<Party>.may(init: ActionBuilder.() -> Action) {
+    fun Set<PartyWithoutCertificate>.may(init: ActionBuilder.() -> Action) {
     }
 
     val start = StartDate()
@@ -152,7 +152,7 @@ interface GivenThatResolve {
     fun resolve(contract: Arrangement)
 }
 
-class ActionBuilder(val actors: Set<Party>) {
+class ActionBuilder(val actors: Set<PartyWithoutCertificate>) {
     internal val actions = mutableListOf<Action>()
 
     fun String.givenThat(condition: Perceivable<Boolean>, init: ContractBuilder.() -> Arrangement): Action {

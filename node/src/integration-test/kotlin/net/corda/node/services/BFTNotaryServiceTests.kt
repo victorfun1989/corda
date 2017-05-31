@@ -6,7 +6,7 @@ import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.TransactionType
 import net.corda.core.crypto.appendToCommonName
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.ServiceInfo
 import net.corda.core.node.services.ServiceType
 import net.corda.core.utilities.ALICE
@@ -16,7 +16,6 @@ import net.corda.flows.NotaryError
 import net.corda.flows.NotaryException
 import net.corda.flows.NotaryFlow
 import net.corda.node.internal.AbstractNode
-import net.corda.node.internal.Node
 import net.corda.node.services.transactions.BFTNonValidatingNotaryService
 import net.corda.node.services.transactions.minCorrectReplicas
 import net.corda.node.utilities.ServiceIdentityGenerator
@@ -51,7 +50,7 @@ class BFTNotaryServiceTests : NodeBasedTest() {
         assertEquals(error.txId, secondSpendTx.id)
     }
 
-    private fun issueState(node: AbstractNode, notary: Party) = node.run {
+    private fun issueState(node: AbstractNode, notary: PartyWithoutCertificate) = node.run {
         database.transaction {
             val builder = DummyContract.generateInitial(Random().nextInt(), notary, info.legalIdentity.ref(0))
             val stx = services.signInitialTransaction(builder)

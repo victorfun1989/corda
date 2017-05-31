@@ -3,7 +3,7 @@ package net.corda.node.services.transactions
 import net.corda.core.ThreadBox
 import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.UniquenessException
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -39,7 +39,7 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
         override fun valueFromRow(row: ResultRow): UniquenessProvider.ConsumingTx = UniquenessProvider.ConsumingTx(
                 row[table.consumingTxHash],
                 row[table.consumingIndex],
-                Party(X500Name(row[table.requestingParty.name]), row[table.requestingParty.owningKey])
+                PartyWithoutCertificate(X500Name(row[table.requestingParty.name]), row[table.requestingParty.owningKey])
         )
 
         override fun addKeyToInsert(insert: InsertStatement,
@@ -59,7 +59,7 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
         }
     })
 
-    override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: Party) {
+    override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: PartyWithoutCertificate) {
         val conflict = committedStates.locked {
             val conflictingStates = LinkedHashMap<StateRef, UniquenessProvider.ConsumingTx>()
             for (inputState in states) {

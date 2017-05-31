@@ -3,7 +3,7 @@ package net.corda.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
 
@@ -18,7 +18,7 @@ import net.corda.core.transactions.SignedTransaction
  */
 @InitiatingFlow
 class BroadcastTransactionFlow(val notarisedTransaction: SignedTransaction,
-                               val participants: Set<Party>) : FlowLogic<Unit>() {
+                               val participants: Set<PartyWithoutCertificate>) : FlowLogic<Unit>() {
     @CordaSerializable
     data class NotifyTxRequest(val tx: SignedTransaction)
 

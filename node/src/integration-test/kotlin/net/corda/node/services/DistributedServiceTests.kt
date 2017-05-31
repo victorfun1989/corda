@@ -3,7 +3,7 @@ package net.corda.node.services
 import net.corda.core.bufferUntilSubscribed
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.POUNDS
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.getOrThrow
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.StateMachineUpdate
@@ -31,7 +31,7 @@ class DistributedServiceTests : DriverBasedTest() {
     lateinit var alice: NodeHandle
     lateinit var notaries: List<NodeHandle>
     lateinit var aliceProxy: CordaRPCOps
-    lateinit var raftNotaryIdentity: Party
+    lateinit var raftNotaryIdentity: PartyWithoutCertificate
     lateinit var notaryStateMachines: Observable<Pair<NodeInfo, StateMachineUpdate>>
 
     override fun setup() = driver {
@@ -83,7 +83,7 @@ class DistributedServiceTests : DriverBasedTest() {
         }
 
         // The state machines added in the notaries should map one-to-one to notarisation requests
-        val notarisationsPerNotary = HashMap<Party, Int>()
+        val notarisationsPerNotary = HashMap<PartyWithoutCertificate, Int>()
         notaryStateMachines.expectEvents(isStrict = false) {
             replicate<Pair<NodeInfo, StateMachineUpdate>>(50) {
                 expect(match = { it.second is StateMachineUpdate.Added }) {
@@ -122,7 +122,7 @@ class DistributedServiceTests : DriverBasedTest() {
             paySelf(5.POUNDS)
         }
 
-        val notarisationsPerNotary = HashMap<Party, Int>()
+        val notarisationsPerNotary = HashMap<PartyWithoutCertificate, Int>()
         notaryStateMachines.expectEvents(isStrict = false) {
             replicate<Pair<NodeInfo, StateMachineUpdate>>(30) {
                 expect(match = { it.second is StateMachineUpdate.Added }) {

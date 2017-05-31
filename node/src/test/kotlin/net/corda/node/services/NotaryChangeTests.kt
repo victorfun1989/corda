@@ -3,7 +3,7 @@ package net.corda.node.services
 import net.corda.core.contracts.*
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.ServiceInfo
 import net.corda.core.seconds
 import net.corda.core.transactions.WireTransaction
@@ -169,7 +169,7 @@ fun issueMultiPartyState(nodeA: AbstractNode, nodeB: AbstractNode, notaryNode: A
     return stateAndRef
 }
 
-fun issueInvalidState(node: AbstractNode, notary: Party): StateAndRef<*> {
+fun issueInvalidState(node: AbstractNode, notary: PartyWithoutCertificate): StateAndRef<*> {
     val tx = DummyContract.generateInitial(Random().nextInt(), notary, node.info.legalIdentity.ref(0))
     tx.addTimeWindow(Instant.now(), 30.seconds)
     val stx = node.services.signInitialTransaction(tx)

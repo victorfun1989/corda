@@ -3,12 +3,11 @@ package net.corda.flows
 import net.corda.core.contracts.*
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
-import java.security.PublicKey
 
 /**
  * A flow to be used for changing a state's Notary. This is required since all input states to a transaction
@@ -22,9 +21,9 @@ import java.security.PublicKey
 @InitiatingFlow
 class NotaryChangeFlow<out T : ContractState>(
         originalState: StateAndRef<T>,
-        newNotary: PartyAndCertificate,
+        newNotary: Party,
         progressTracker: ProgressTracker = tracker())
-    : AbstractStateReplacementFlow.Instigator<T, T, Party>(originalState, newNotary, progressTracker) {
+    : AbstractStateReplacementFlow.Instigator<T, T, PartyWithoutCertificate>(originalState, newNotary, progressTracker) {
 
     override fun assembleTx(): Pair<SignedTransaction, Iterable<AbstractParty>> {
         val state = originalState.state

@@ -4,7 +4,7 @@ import net.corda.core.contracts.*
 import net.corda.core.crypto.keys
 import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.vega.flows.SimmRevaluation
@@ -43,11 +43,11 @@ data class PortfolioState(val portfolio: List<StateRef>,
         return parties.flatMap { it.owningKey.keys }.intersect(ourKeys).isNotEmpty()
     }
 
-    override fun generateAgreement(notary: Party): TransactionBuilder {
+    override fun generateAgreement(notary: PartyWithoutCertificate): TransactionBuilder {
         return TransactionType.General.Builder(notary).withItems(copy(), Command(PortfolioSwap.Commands.Agree(), parties.map { it.owningKey }))
     }
 
-    override fun generateRevision(notary: Party, oldState: StateAndRef<*>, updatedValue: Update): TransactionBuilder {
+    override fun generateRevision(notary: PartyWithoutCertificate, oldState: StateAndRef<*>, updatedValue: Update): TransactionBuilder {
         require(oldState.state.data == this)
         val portfolio = updatedValue.portfolio ?: portfolio
         val valuation = updatedValue.valuation ?: valuation

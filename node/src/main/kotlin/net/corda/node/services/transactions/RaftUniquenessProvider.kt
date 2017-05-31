@@ -16,7 +16,7 @@ import io.atomix.copycat.server.storage.Storage
 import io.atomix.copycat.server.storage.StorageLevel
 import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.UniquenessException
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -134,7 +134,7 @@ class RaftUniquenessProvider(
                 .build()
     }
 
-    override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: Party) {
+    override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: PartyWithoutCertificate) {
         val entries = states.mapIndexed { i, stateRef -> stateRef to UniquenessProvider.ConsumingTx(txId, i, callerIdentity) }
 
         log.debug("Attempting to commit input states: ${states.joinToString()}")

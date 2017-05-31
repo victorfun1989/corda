@@ -16,7 +16,7 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.crypto.toBase58String
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.services.Vault
 import net.corda.core.schemas.requery.converters.InstantConverter
 import net.corda.core.schemas.requery.converters.VaultStateStatusConverter
@@ -103,7 +103,7 @@ class VaultSchemaTest {
 
     private fun setupDummyData() {
         // dummy Transaction
-        val notary: Party = DUMMY_NOTARY
+        val notary: PartyWithoutCertificate = DUMMY_NOTARY
         val inState1 = TransactionState(DummyContract.SingleOwnerState(0, ALICE), notary)
         val inState2 = TransactionState(DummyContract.MultiOwnerState(0,
                 listOf(ALICE, BOB)), notary)
@@ -134,7 +134,7 @@ class VaultSchemaTest {
     }
 
     private fun createTxnWithTwoStateTypes(): LedgerTransaction {
-        val notary: Party = DUMMY_NOTARY
+        val notary: PartyWithoutCertificate = DUMMY_NOTARY
         val inState1 = TransactionState(DummyContract.SingleOwnerState(0, ALICE), notary)
         val inState2 = TransactionState(DummyContract.MultiOwnerState(0,
                 listOf(ALICE, BOB)), notary)

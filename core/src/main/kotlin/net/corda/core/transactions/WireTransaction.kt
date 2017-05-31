@@ -5,6 +5,7 @@ import net.corda.core.contracts.*
 import net.corda.core.crypto.MerkleTree
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.indexOfOrThrow
 import net.corda.core.node.ServicesForResolution
 import net.corda.core.serialization.SerializedBytes
@@ -28,7 +29,7 @@ class WireTransaction(
         outputs: List<TransactionState<ContractState>>,
         /** Ordered list of ([CommandData], [PublicKey]) pairs that instruct the contracts what to do. */
         override val commands: List<Command>,
-        notary: Party?,
+        notary: PartyWithoutCertificate?,
         signers: List<PublicKey>,
         type: TransactionType,
         timeWindow: TimeWindow?
@@ -127,7 +128,7 @@ class WireTransaction(
                 attachments.filter { filtering(it) },
                 outputs.filter { filtering(it) },
                 commands.filter { filtering(it) },
-                notNullFalse(notary) as Party?,
+                notNullFalse(notary) as PartyWithoutCertificate?,
                 mustSign.filter { filtering(it) },
                 notNullFalse(type) as TransactionType?,
                 notNullFalse(timeWindow) as TimeWindow?

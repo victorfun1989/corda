@@ -11,8 +11,8 @@ import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult
 import net.corda.core.*
 import net.corda.core.crypto.*
 import net.corda.core.flows.*
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.RPCOps
 import net.corda.core.messaging.SingleMessageRecipient
@@ -315,7 +315,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
                         registerInitiatedFlowInternal(it, track = false)
                     } catch (e: NoSuchMethodException) {
                         log.error("${it.name}, as an initiated flow, must have a constructor with a single parameter " +
-                                "of type ${Party::class.java.name}")
+                                "of type ${PartyWithoutCertificate::class.java.name}")
                     } catch (e: Exception) {
                         log.error("Unable to register initiated flow ${it.name}", e)
                     }
@@ -348,11 +348,11 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
 
     private fun <F : FlowLogic<*>> registerInitiatedFlowInternal(initiatedFlow: Class<F>, track: Boolean): Observable<F> {
         val ctor = try {
-            initiatedFlow.getDeclaredConstructor(PartyAndCertificate::class.java).apply { isAccessible = true }
+            initiatedFlow.getDeclaredConstructor(Party::class.java).apply { isAccessible = true }
         } catch(ex: NoSuchMethodException) {
             // Fall back to a constructor that takes in a Party
             // TODO: Consider removing for 1.0 release, as flows should generally take the more detailed class
-            initiatedFlow.getDeclaredConstructor(Party::class.java).apply { isAccessible = true }
+            initiatedFlow.getDeclaredConstructor(PartyWithoutCertificate::class.java).apply { isAccessible = true }
         }
         val initiatingFlow = initiatedFlow.requireAnnotation<InitiatedBy>().value.java
         val (version, classWithAnnotation) = initiatingFlow.flowVersionAndInitiatingClass
@@ -401,7 +401,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
      * @suppress
      */
     @VisibleForTesting
-    fun installCoreFlow(clientFlowClass: KClass<out FlowLogic<*>>, flowFactory: (PartyAndCertificate, Int) -> FlowLogic<*>) {
+    fun installCoreFlow(clientFlowClass: KClass<out FlowLogic<*>>, flowFactory: (Party, Int) -> FlowLogic<*>) {
         require(clientFlowClass.java.flowVersionAndInitiatingClass.first == 1) {
             "${InitiatingFlow::class.java.name}.version not applicable for core flows; their version is the node's platform version"
         }
@@ -718,11 +718,11 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
                                                stateMachineRecordedTransactionMappingStorage: StateMachineRecordedTransactionMappingStorage) =
             StorageServiceImpl(attachments, transactionStorage, stateMachineRecordedTransactionMappingStorage)
 
-    protected fun obtainLegalIdentity(): PartyAndCertificate = identityKeyPair.first
+    protected fun obtainLegalIdentity(): Party = identityKeyPair.first
     protected fun obtainLegalIdentityKey(): KeyPair = identityKeyPair.second
     private val identityKeyPair by lazy { obtainKeyPair("identity", configuration.myLegalName) }
 
-    private fun obtainKeyPair(serviceId: String, serviceName: X500Name): Pair<PartyAndCertificate, KeyPair> {
+    private fun obtainKeyPair(serviceId: String, serviceName: X500Name): Pair<Party, KeyPair> {
         // Load the private identity key, creating it if necessary. The identity key is a long term well known key that
         // is distributed to other peers and we use it (or a key signed by it) when we need to do something
         // "permissioned". The identity file is what gets distributed and contains the node's legal name along with
@@ -735,7 +735,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
         val privKeyFile = configuration.baseDirectory / privateKeyAlias
         val pubIdentityFile = configuration.baseDirectory / "$serviceId-public"
         val certificateAndKeyPair = keyStore.certificateAndKeyPair(privateKeyAlias)
-        val identityCertPathAndKey: Pair<PartyAndCertificate, KeyPair> = if (certificateAndKeyPair != null) {
+        val identityCertPathAndKey: Pair<Party, KeyPair> = if (certificateAndKeyPair != null) {
             val (cert, keyPair) = certificateAndKeyPair
             // Get keys from keystore.
             val loadedServiceName = X509CertificateHolder(cert.encoded).subject
@@ -744,14 +744,14 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
                         "$serviceName vs $loadedServiceName")
             }
             val certPath = X509Utilities.createCertificatePath(cert, cert, revocationEnabled = false)
-            Pair(PartyAndCertificate(loadedServiceName, keyPair.public, cert, certPath), keyPair)
+            Pair(Party(loadedServiceName, keyPair.public, cert, certPath), keyPair)
         } else if (privKeyFile.exists()) {
             // Get keys from key file.
             // TODO: this is here to smooth out the key storage transition, remove this in future release.
             // Check that the identity in the config file matches the identity file we have stored to disk.
             // This is just a sanity check. It shouldn't fail unless the admin has fiddled with the files and messed
             // things up for us.
-            val myIdentity = pubIdentityFile.readAll().deserialize<PartyAndCertificate>()
+            val myIdentity = pubIdentityFile.readAll().deserialize<Party>()
             if (myIdentity.name != serviceName)
                 throw ConfigurationException("The legal name in the config file doesn't match the stored identity file:" +
                         "$serviceName vs ${myIdentity.name}")
@@ -770,7 +770,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
             val certPath = X509Utilities.createCertificatePath(cert, cert, revocationEnabled = false)
             keyStore.save(serviceName, privateKeyAlias, keyPair)
             require(certPath.certificates.isNotEmpty()) { "Certificate path cannot be empty" }
-            Pair(PartyAndCertificate(serviceName, keyPair.public, cert, certPath), keyPair)
+            Pair(Party(serviceName, keyPair.public, cert, certPath), keyPair)
         }
         partyKeys += identityCertPathAndKey.second
         return identityCertPathAndKey

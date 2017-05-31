@@ -11,7 +11,7 @@ import net.corda.core.contracts.clauses.*;
 import net.corda.core.crypto.*;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.AnonymousParty;
-import net.corda.core.identity.Party;
+import net.corda.core.identity.PartyWithoutCertificate;
 import net.corda.core.node.services.*;
 import net.corda.core.transactions.*;
 import org.jetbrains.annotations.*;
@@ -304,13 +304,13 @@ public class JavaCommercialPaper implements Contract {
         return SecureHash.sha256("https://en.wikipedia.org/wiki/Commercial_paper");
     }
 
-    public TransactionBuilder generateIssue(@NotNull PartyAndReference issuance, @NotNull Amount<Issued<Currency>> faceValue, @Nullable Instant maturityDate, @NotNull Party notary, Integer encumbrance) {
+    public TransactionBuilder generateIssue(@NotNull PartyAndReference issuance, @NotNull Amount<Issued<Currency>> faceValue, @Nullable Instant maturityDate, @NotNull PartyWithoutCertificate notary, Integer encumbrance) {
         State state = new State(issuance, issuance.getParty(), faceValue, maturityDate);
         TransactionState output = new TransactionState<>(state, notary, encumbrance);
         return new TransactionType.General.Builder(notary).withItems(output, new Command(new Commands.Issue(), issuance.getParty().getOwningKey()));
     }
 
-    public TransactionBuilder generateIssue(@NotNull PartyAndReference issuance, @NotNull Amount<Issued<Currency>> faceValue, @Nullable Instant maturityDate, @NotNull Party notary) {
+    public TransactionBuilder generateIssue(@NotNull PartyAndReference issuance, @NotNull Amount<Issued<Currency>> faceValue, @Nullable Instant maturityDate, @NotNull PartyWithoutCertificate notary) {
         return generateIssue(issuance, faceValue, maturityDate, notary, null);
     }
 

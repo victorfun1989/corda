@@ -9,8 +9,8 @@ import net.corda.core.crypto.isFulfilledBy
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
@@ -97,7 +97,7 @@ abstract class AbstractStateReplacementFlow {
         }
 
         @Suspendable
-        private fun getParticipantSignature(party: Party, stx: SignedTransaction): DigitalSignature.WithKey {
+        private fun getParticipantSignature(party: PartyWithoutCertificate, stx: SignedTransaction): DigitalSignature.WithKey {
             val proposal = Proposal(originalState.ref, modification, stx)
             val response = sendAndReceive<DigitalSignature.WithKey>(party, proposal)
             return response.unwrap {
@@ -120,7 +120,7 @@ abstract class AbstractStateReplacementFlow {
 
     // Type parameter should ideally be Unit but that prevents Java code from subclassing it (https://youtrack.jetbrains.com/issue/KT-15964).
     // We use Void? instead of Unit? as that's what you'd use in Java.
-    abstract class Acceptor<in T>(val otherSide: PartyAndCertificate,
+    abstract class Acceptor<in T>(val otherSide: Party,
                                   override val progressTracker: ProgressTracker = tracker()) : FlowLogic<Void?>() {
         companion object {
             object VERIFYING : ProgressTracker.Step("Verifying state replacement proposal")

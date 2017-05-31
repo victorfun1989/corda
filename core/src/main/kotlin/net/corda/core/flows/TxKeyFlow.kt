@@ -3,7 +3,6 @@ package net.corda.core.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.identity.AnonymousParty
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.unwrap
@@ -15,7 +14,7 @@ import java.security.cert.CertPath
  * This is intended for use as a subflow of another flow.
  */
 object TxKeyFlow {
-    abstract class AbstractIdentityFlow<out T>(val otherSide: PartyAndCertificate, val revocationEnabled: Boolean): FlowLogic<T>() {
+    abstract class AbstractIdentityFlow<out T>(val otherSide: Party, val revocationEnabled: Boolean): FlowLogic<T>() {
         fun validateIdentity(untrustedIdentity: AnonymousIdentity): AnonymousIdentity {
             val (certPath, theirCert, txIdentity) = untrustedIdentity
             if (theirCert.subject == otherSide.name) {
@@ -28,9 +27,9 @@ object TxKeyFlow {
 
     @StartableByRPC
     @InitiatingFlow
-    class Requester(otherSide: PartyAndCertificate,
+    class Requester(otherSide: Party,
                     override val progressTracker: ProgressTracker) : AbstractIdentityFlow<Map<Party, AnonymousIdentity>>(otherSide, false) {
-        constructor(otherSide: PartyAndCertificate) : this(otherSide, tracker())
+        constructor(otherSide: Party) : this(otherSide, tracker())
         companion object {
             object AWAITING_KEY : ProgressTracker.Step("Awaiting key")
 
@@ -54,7 +53,7 @@ object TxKeyFlow {
      * counterparty and as the result from the flow.
      */
     @InitiatedBy(Requester::class)
-    class Provider(otherSide: PartyAndCertificate) : AbstractIdentityFlow<Map<Party, AnonymousIdentity>>(otherSide, false) {
+    class Provider(otherSide: Party) : AbstractIdentityFlow<Map<Party, AnonymousIdentity>>(otherSide, false) {
         companion object {
             object SENDING_KEY : ProgressTracker.Step("Sending key")
         }

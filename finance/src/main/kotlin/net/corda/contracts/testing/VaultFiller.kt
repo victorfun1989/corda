@@ -8,7 +8,7 @@ import net.corda.contracts.asset.DUMMY_CASH_ISSUER_KEY
 import net.corda.core.contracts.*
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.Vault
 import net.corda.core.serialization.OpaqueBytes
@@ -83,7 +83,7 @@ fun ServiceHub.fillWithSomeTestLinearStates(numberToCreate: Int,
  * @return a vault object that represents the generated states (it will NOT be the full vault from the service hub!).
  */
 fun ServiceHub.fillWithSomeTestCash(howMuch: Amount<Currency>,
-                                    outputNotary: Party = DUMMY_NOTARY,
+                                    outputNotary: PartyWithoutCertificate = DUMMY_NOTARY,
                                     atLeastThisManyStates: Int = 3,
                                     atMostThisManyStates: Int = 10,
                                     rng: Random = Random(),

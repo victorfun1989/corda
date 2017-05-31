@@ -11,8 +11,8 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.NodeInfo
 import net.corda.core.seconds
 import net.corda.core.transactions.SignedTransaction
@@ -25,10 +25,10 @@ import java.util.*
 
 @InitiatingFlow
 @StartableByRPC
-class SellerFlow(val otherParty: PartyAndCertificate,
+class SellerFlow(val otherParty: Party,
                  val amount: Amount<Currency>,
                  override val progressTracker: ProgressTracker) : FlowLogic<SignedTransaction>() {
-    constructor(otherParty: PartyAndCertificate, amount: Amount<Currency>) : this(otherParty, amount, tracker())
+    constructor(otherParty: Party, amount: Amount<Currency>) : this(otherParty, amount, tracker())
 
     companion object {
         val PROSPECTUS_HASH = SecureHash.parse("decd098666b9657314870e192ced0c3519c2c9d395507a238338f8d003929de9")
@@ -71,7 +71,7 @@ class SellerFlow(val otherParty: PartyAndCertificate,
     fun selfIssueSomeCommercialPaper(ownedBy: AbstractParty, notaryNode: NodeInfo): StateAndRef<CommercialPaper.State> {
         // Make a fake company that's issued its own paper.
         val keyPair = generateKeyPair()
-        val party = Party(BOC.name, keyPair.public)
+        val party = PartyWithoutCertificate(BOC.name, keyPair.public)
 
         val issuance: SignedTransaction = run {
             val tx = CommercialPaper().generateIssue(party.ref(1, 2, 3), 1100.DOLLARS `issued by` DUMMY_CASH_ISSUER,

@@ -3,7 +3,7 @@ package net.corda.contracts.universal
 import net.corda.core.contracts.*
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.transactions.TransactionBuilder
 import java.math.BigDecimal
 import java.time.Instant
@@ -25,7 +25,7 @@ class UniversalContract : Contract {
 
         // replace parties
         // must be signed by all parties present in contract before and after command
-        class Move(val from: Party, val to: Party) : TypeOnlyCommandData(), Commands
+        class Move(val from: PartyWithoutCertificate, val to: PartyWithoutCertificate) : TypeOnlyCommandData(), Commands
 
         // must be signed by all liable parties present in contract
         class Issue : TypeOnlyCommandData(), Commands
@@ -316,7 +316,7 @@ class UniversalContract : Contract {
     override val legalContractReference: SecureHash
         get() = throw UnsupportedOperationException()
 
-    fun generateIssue(tx: TransactionBuilder, arrangement: Arrangement, at: PartyAndReference, notary: Party) {
+    fun generateIssue(tx: TransactionBuilder, arrangement: Arrangement, at: PartyAndReference, notary: PartyWithoutCertificate) {
         check(tx.inputStates().isEmpty())
         tx.addOutputState(State(listOf(notary), arrangement))
         tx.addCommand(Commands.Issue(), at.party.owningKey)

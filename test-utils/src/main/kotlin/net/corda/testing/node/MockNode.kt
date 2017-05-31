@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.ListenableFuture
 import net.corda.core.*
 import net.corda.core.crypto.entropyToKeyPair
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.messaging.RPCOps
 import net.corda.core.messaging.SingleMessageRecipient
 import net.corda.core.node.CordaPluginRegistry
@@ -71,7 +70,7 @@ class MockNetwork(private val networkSendManuallyPumped: Boolean = false,
     // A unique identifier for this network to segregate databases with the same nodeID but different networks.
     private val networkId = random63BitValue()
 
-    val identities = ArrayList<PartyAndCertificate>()
+    val identities = ArrayList<Party>()
 
     private val _nodes = ArrayList<MockNode>()
     /** A read only view of the current set of executing nodes. */

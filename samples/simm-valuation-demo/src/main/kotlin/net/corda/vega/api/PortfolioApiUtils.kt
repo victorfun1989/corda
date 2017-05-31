@@ -6,7 +6,7 @@ import com.opengamma.strata.product.swap.RateCalculationSwapLeg
 import com.opengamma.strata.product.swap.SwapLegType
 import net.corda.core.contracts.hash
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.crypto.toBase58String
 import net.corda.vega.contracts.IRSState
 import net.corda.vega.contracts.PortfolioState
@@ -16,7 +16,7 @@ import java.time.LocalDate
 /**
  * API JSON generation functions for larger JSON outputs.
  */
-class PortfolioApiUtils(private val ownParty: Party) {
+class PortfolioApiUtils(private val ownParty: PartyWithoutCertificate) {
     data class InitialMarginView(val baseCurrency: String, val post: Map<String, Double>, val call: Map<String, Double>, val agreed: Boolean)
     data class ValuationsView(
             val businessDate: LocalDate,

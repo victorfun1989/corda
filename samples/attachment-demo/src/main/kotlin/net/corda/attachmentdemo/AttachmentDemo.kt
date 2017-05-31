@@ -8,7 +8,7 @@ import net.corda.core.contracts.Contract
 import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.TransactionForContract
 import net.corda.core.contracts.TransactionType
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
@@ -76,7 +76,7 @@ fun sender(rpc: CordaRPCOps, numOfClearBytes: Int = 1024) { // default size 1K.
 fun sender(rpc: CordaRPCOps, inputStream: InputStream, hash: SecureHash.SHA256) {
     // Get the identity key of the other side (the recipient).
     val executor = Executors.newScheduledThreadPool(1)
-    val otherSide: Party = poll(executor, DUMMY_BANK_B.name.toString()) { rpc.partyFromX500Name(DUMMY_BANK_B.name) }.get()
+    val otherSide: PartyWithoutCertificate = poll(executor, DUMMY_BANK_B.name.toString()) { rpc.partyFromX500Name(DUMMY_BANK_B.name) }.get()
 
     // Make sure we have the file in storage
     if (!rpc.attachmentExists(hash)) {
@@ -94,7 +94,7 @@ fun sender(rpc: CordaRPCOps, inputStream: InputStream, hash: SecureHash.SHA256) 
 }
 
 @StartableByRPC
-class AttachmentDemoFlow(val otherSide: Party, val hash: SecureHash.SHA256) : FlowLogic<SignedTransaction>() {
+class AttachmentDemoFlow(val otherSide: PartyWithoutCertificate, val hash: SecureHash.SHA256) : FlowLogic<SignedTransaction>() {
 
     object SIGNING : ProgressTracker.Step("Signing transaction")
 

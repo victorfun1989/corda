@@ -1,7 +1,7 @@
 package net.corda.contracts.universal
 
 import net.corda.core.crypto.generateKeyPair
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.utilities.ALICE
 import net.corda.testing.MEGA_CORP
 import net.corda.testing.MINI_CORP
@@ -11,9 +11,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 // Test parties
-val acmeCorp = Party(ALICE.name, generateKeyPair().public)
-val highStreetBank = Party(MEGA_CORP.name, generateKeyPair().public)
-val momAndPop = Party(MINI_CORP.name, generateKeyPair().public)
+val acmeCorp = PartyWithoutCertificate(ALICE.name, generateKeyPair().public)
+val highStreetBank = PartyWithoutCertificate(MEGA_CORP.name, generateKeyPair().public)
+val momAndPop = PartyWithoutCertificate(MINI_CORP.name, generateKeyPair().public)
 
 val acmeCorporationHasDefaulted = TerminalEvent(acmeCorp, generateKeyPair().public)
 

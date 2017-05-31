@@ -5,7 +5,7 @@ import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.NodeInfo
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.utilities.ProgressTracker
@@ -25,7 +25,7 @@ object UpdateBusinessDayFlow {
     data class UpdateBusinessDayMessage(val date: LocalDate)
 
     @InitiatedBy(Broadcast::class)
-    private class UpdateBusinessDayHandler(val otherParty: Party) : FlowLogic<Unit>() {
+    private class UpdateBusinessDayHandler(val otherParty: PartyWithoutCertificate) : FlowLogic<Unit>() {
         override fun call() {
             val message = receive<UpdateBusinessDayMessage>(otherParty).unwrap { it }
             (serviceHub.clock as TestClock).updateDate(message.date)

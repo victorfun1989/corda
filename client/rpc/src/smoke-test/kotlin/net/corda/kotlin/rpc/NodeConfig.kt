@@ -6,13 +6,13 @@ import net.corda.core.identity.Party
 import net.corda.nodeapi.User
 
 class NodeConfig(
-    val party: Party,
-    val p2pPort: Int,
-    val rpcPort: Int,
-    val webPort: Int,
-    val extraServices: List<String>,
-    val users: List<User>,
-    var networkMap: NodeConfig? = null
+        val party: Party,
+        val p2pPort: Int,
+        val rpcPort: Int,
+        val webPort: Int,
+        val extraServices: List<String>,
+        val users: List<User>,
+        var networkMap: NodeConfig? = null
 ) {
     companion object {
         val renderOptions: ConfigRenderOptions = ConfigRenderOptions.defaults().setOriginComments(false)

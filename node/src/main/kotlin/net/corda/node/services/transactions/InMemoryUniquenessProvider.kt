@@ -2,7 +2,7 @@ package net.corda.node.services.transactions
 
 import net.corda.core.ThreadBox
 import net.corda.core.contracts.StateRef
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.crypto.SecureHash
 import net.corda.core.node.services.UniquenessException
 import net.corda.core.node.services.UniquenessProvider
@@ -15,7 +15,7 @@ class InMemoryUniquenessProvider : UniquenessProvider {
     /** For each input state store the consuming transaction information */
     private val committedStates = ThreadBox(HashMap<StateRef, UniquenessProvider.ConsumingTx>())
 
-    override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: Party) {
+    override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: PartyWithoutCertificate) {
         committedStates.locked {
             val conflictingStates = LinkedHashMap<StateRef, UniquenessProvider.ConsumingTx>()
             for (inputState in states) {

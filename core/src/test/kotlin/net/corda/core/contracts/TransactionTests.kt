@@ -5,7 +5,7 @@ import net.corda.core.crypto.CompositeKey
 import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.generateKeyPair
 import net.corda.core.crypto.sign
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.SerializedBytes
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.transactions.SignedTransaction
@@ -146,7 +146,7 @@ class TransactionTests {
 
     @Test
     fun `general transactions cannot change notary`() {
-        val notary: Party = DUMMY_NOTARY
+        val notary: PartyWithoutCertificate = DUMMY_NOTARY
         val inState = TransactionState(DummyContract.SingleOwnerState(0, ALICE), notary)
         val outState = inState.copy(notary = ALICE)
         val inputs = listOf(StateAndRef(inState, StateRef(SecureHash.randomSHA256(), 0)))

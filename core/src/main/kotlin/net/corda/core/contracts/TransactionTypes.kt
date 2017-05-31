@@ -1,6 +1,7 @@
 package net.corda.core.contracts
 
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.serialization.DeserializeAsKotlinObjectDef
 import net.corda.core.transactions.LedgerTransaction
@@ -63,7 +64,7 @@ sealed class TransactionType {
     /** A general transaction type where transaction validity is determined by custom contract code */
     object General : TransactionType(), DeserializeAsKotlinObjectDef {
         /** Just uses the default [TransactionBuilder] with no special logic */
-        class Builder(notary: Party?) : TransactionBuilder(General, notary)
+        class Builder(notary: PartyWithoutCertificate?) : TransactionBuilder(General, notary)
 
         override fun verifyTransaction(tx: LedgerTransaction) {
             verifyNoNotaryChange(tx)
@@ -146,7 +147,7 @@ sealed class TransactionType {
          * A transaction builder that automatically sets the transaction type to [NotaryChange]
          * and adds the list of participants to the signers set for every input state.
          */
-        class Builder(notary: Party) : TransactionBuilder(NotaryChange, notary) {
+        class Builder(notary: PartyWithoutCertificate) : TransactionBuilder(NotaryChange, notary) {
             override fun addInputState(stateAndRef: StateAndRef<*>) {
                 signers.addAll(stateAndRef.state.data.participants.map { it.owningKey })
                 super.addInputState(stateAndRef)

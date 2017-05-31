@@ -6,8 +6,8 @@ import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.getOrThrow
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.messaging.RPCOps
 import net.corda.core.messaging.SingleMessageRecipient
 import net.corda.core.node.services.ServiceInfo
@@ -80,7 +80,7 @@ class AttachmentSerializationTest {
         network.stopNodes()
     }
 
-    private class ServerLogic(private val client: Party) : FlowLogic<Unit>() {
+    private class ServerLogic(private val client: PartyWithoutCertificate) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() {
             receive<String>(client).unwrap { assertEquals("ping one", it) }
@@ -140,7 +140,7 @@ class AttachmentSerializationTest {
 
     private fun launchFlow(clientLogic: ClientLogic, rounds: Int) {
         server.registerFlowFactory(ClientLogic::class.java, object : InitiatedFlowFactory<ServerLogic> {
-            override fun createFlow(platformVersion: Int, otherParty: PartyAndCertificate, sessionInit: SessionInit): ServerLogic {
+            override fun createFlow(platformVersion: Int, otherParty: Party, sessionInit: SessionInit): ServerLogic {
                 return ServerLogic(otherParty)
             }
         }, ServerLogic::class.java, track = false)

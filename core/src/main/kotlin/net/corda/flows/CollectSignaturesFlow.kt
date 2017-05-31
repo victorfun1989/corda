@@ -6,8 +6,8 @@ import net.corda.core.crypto.isFulfilledBy
 import net.corda.core.crypto.toBase58String
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
@@ -115,9 +115,9 @@ class CollectSignaturesFlow(val partiallySignedTx: SignedTransaction,
     }
 
     /**
-     * Lookup the [Party] object for each [PublicKey] using the [ServiceHub.networkMapCache].
+     * Lookup the [PartyWithoutCertificate] object for each [PublicKey] using the [ServiceHub.networkMapCache].
      */
-    @Suspendable private fun keysToParties(keys: List<PublicKey>): List<Party> = keys.map {
+    @Suspendable private fun keysToParties(keys: List<PublicKey>): List<PartyWithoutCertificate> = keys.map {
         // TODO: Revisit when IdentityService supports resolution of a (possibly random) public key to a legal identity key.
         val partyNode = serviceHub.networkMapCache.getNodeByLegalIdentityKey(it)
                 ?: throw IllegalStateException("Party ${it.toBase58String()} not found on the network.")
@@ -127,7 +127,7 @@ class CollectSignaturesFlow(val partiallySignedTx: SignedTransaction,
     /**
      * Get and check the required signature.
      */
-    @Suspendable private fun collectSignature(counterparty: Party): DigitalSignature.WithKey {
+    @Suspendable private fun collectSignature(counterparty: PartyWithoutCertificate): DigitalSignature.WithKey {
         return sendAndReceive<DigitalSignature.WithKey>(counterparty, partiallySignedTx).unwrap {
             require(counterparty.owningKey.isFulfilledBy(it.by)) { "Not signed by the required Party." }
             it
@@ -139,7 +139,7 @@ class CollectSignaturesFlow(val partiallySignedTx: SignedTransaction,
  * The [SignTransactionFlow] should be called in response to the [CollectSignaturesFlow]. It automates the signing of
  * a transaction providing the transaction:
  *
- * 1. Should actually be signed by the [Party] invoking this flow
+ * 1. Should actually be signed by the [PartyWithoutCertificate] invoking this flow
  * 2. Is valid as per the contracts referenced in the transaction
  * 3. Has been, at least, signed by the counter-party which created it
  * 4. Conforms to custom checking provided in the [checkTransaction] method of the [SignTransactionFlow]
@@ -174,7 +174,7 @@ class CollectSignaturesFlow(val partiallySignedTx: SignedTransaction,
  *
  * @param otherParty The counter-party which is providing you a transaction to sign.
  */
-abstract class SignTransactionFlow(val otherParty: PartyAndCertificate,
+abstract class SignTransactionFlow(val otherParty: Party,
                                    override val progressTracker: ProgressTracker = tracker()) : FlowLogic<SignedTransaction>() {
 
     companion object {

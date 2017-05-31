@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import net.corda.core.contracts.ScheduledStateRef
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.node.ServiceHub
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
@@ -55,16 +56,16 @@ data class StateMachineRunId(val uuid: UUID) {
 interface FlowStateMachine<R> {
     @Suspendable
     fun <T : Any> sendAndReceive(receiveType: Class<T>,
-                                 otherParty: Party,
+                                 otherParty: PartyWithoutCertificate,
                                  payload: Any,
                                  sessionFlow: FlowLogic<*>,
                                  retrySend: Boolean = false): UntrustworthyData<T>
 
     @Suspendable
-    fun <T : Any> receive(receiveType: Class<T>, otherParty: Party, sessionFlow: FlowLogic<*>): UntrustworthyData<T>
+    fun <T : Any> receive(receiveType: Class<T>, otherParty: PartyWithoutCertificate, sessionFlow: FlowLogic<*>): UntrustworthyData<T>
 
     @Suspendable
-    fun send(otherParty: Party, payload: Any, sessionFlow: FlowLogic<*>)
+    fun send(otherParty: PartyWithoutCertificate, payload: Any, sessionFlow: FlowLogic<*>)
 
     @Suspendable
     fun waitForLedgerCommit(hash: SecureHash, sessionFlow: FlowLogic<*>): SignedTransaction

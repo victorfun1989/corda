@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.Futures
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.getOrThrow
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.utilities.ALICE
 import net.corda.core.utilities.BOB
 import net.corda.core.utilities.unwrap
@@ -25,14 +25,14 @@ class FlowVersioningTest : NodeBasedTest() {
     }
 
     @InitiatingFlow
-    private class ClientFlow(val otherParty: Party) : FlowLogic<Any>() {
+    private class ClientFlow(val otherParty: PartyWithoutCertificate) : FlowLogic<Any>() {
         @Suspendable
         override fun call(): Any {
             return sendAndReceive<Any>(otherParty, "This is ignored. We only send to kick off the flow on the other side").unwrap { it }
         }
     }
 
-    private class SendBackPlatformVersionFlow(val otherParty: Party, val otherPartysPlatformVersion: Int) : FlowLogic<Unit>() {
+    private class SendBackPlatformVersionFlow(val otherParty: PartyWithoutCertificate, val otherPartysPlatformVersion: Int) : FlowLogic<Unit>() {
         @Suspendable
         override fun call() = send(otherParty, otherPartysPlatformVersion)
     }

@@ -2,7 +2,7 @@ package net.corda.contracts.universal
 
 import net.corda.core.crypto.commonName
 import net.corda.core.crypto.toStringShort
-import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import java.math.BigDecimal
 import java.security.PublicKey
 import java.time.Instant
@@ -46,7 +46,7 @@ private class PrettyPrint(arr : Arrangement) {
     val partyMap = mutableMapOf<PublicKey, String>()
     val usedPartyNames = mutableSetOf<String>()
 
-    fun createPartyName(party : Party) : String
+    fun createPartyName(party : PartyWithoutCertificate) : String
     {
         val parts = party.name.commonName.toLowerCase().split(' ')
 

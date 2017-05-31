@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import net.corda.core.bufferUntilSubscribed
 import net.corda.core.identity.Party
+import net.corda.core.identity.PartyWithoutCertificate
 import net.corda.core.map
 import net.corda.core.messaging.SingleMessageRecipient
 import net.corda.core.node.NodeInfo
@@ -54,7 +55,7 @@ open class InMemoryNetworkMapCache : SingletonSerializeAsToken(), NetworkMapCach
     private var registeredForPush = false
     protected var registeredNodes: MutableMap<PublicKey, NodeInfo> = Collections.synchronizedMap(HashMap())
 
-    override fun getPartyInfo(party: Party): PartyInfo? {
+    override fun getPartyInfo(party: PartyWithoutCertificate): PartyInfo? {
         val node = registeredNodes[party.owningKey]
         if (node != null) {
             return PartyInfo.Node(node)
