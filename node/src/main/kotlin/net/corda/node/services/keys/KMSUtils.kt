@@ -5,7 +5,7 @@ import net.corda.core.crypto.ContentSignerBuilder
 import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.X509Utilities
 import net.corda.core.identity.AnonymousParty
-import net.corda.core.identity.PartyAndCertificate
+import net.corda.core.identity.Party
 import net.corda.core.node.services.IdentityService
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.operator.ContentSigner
@@ -24,16 +24,17 @@ import java.util.*
  * @param subjectPublicKey public key of new identity.
  * @param issuerSigner a content signer for the issuer.
  * @param identityService issuer service to use when registering the certificate.
- * @param issuer issuer to generate a key and certificate for. Must be an identity this node has the private key for.
+ * @param issuer issuer to generate a key and certificate for. Must be an identity this node has the private key for, and
+ * must include its own certificate in the identity.
  * @param revocationEnabled whether to check revocation status of certificates in the certificate path.
  * @return X.509 certificate and path to the trust root.
  */
 fun freshCertificate(identityService: IdentityService,
                      subjectPublicKey: PublicKey,
-                     issuer: PartyAndCertificate,
+                     issuer: Party,
                      issuerSigner: ContentSigner,
                      revocationEnabled: Boolean = false): Pair<X509CertificateHolder, CertPath> {
-    val issuerCertificate = issuer.certificate
+    val issuerCertificate = issuer.certificate ?: throw IllegalArgumentException("Issuing party must include certificate")
     val window = X509Utilities.getCertificateValidityWindow(Duration.ZERO, Duration.ofDays(10 * 365), issuerCertificate)
     val ourCertificate = Crypto.createCertificate(CertificateType.IDENTITY, issuerCertificate.subject, issuerSigner, issuer.name, subjectPublicKey, window)
     val actualPublicKey = Crypto.toSupportedPublicKey(ourCertificate.subjectPublicKeyInfo)

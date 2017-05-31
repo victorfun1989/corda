@@ -268,8 +268,7 @@ fun <T : Any> rx.Observable<T>.wrapWithDatabaseTransaction(db: Database? = null)
 }
 
 // Composite columns for use with below Exposed helpers.
-data class PartyColumns(val name: Column<String>, val owningKey: Column<PublicKey>)
-data class PartyAndCertificateColumns(val name: Column<String>, val owningKey: Column<PublicKey>,
+data class PartyColumns(val name: Column<String>, val owningKey: Column<PublicKey>,
                                       val certificate: Column<X509CertificateHolder>, val certPath: Column<CertPath>)
 data class StateRefColumns(val txId: Column<SecureHash>, val index: Column<Int>)
 data class TxnNoteColumns(val txId: Column<SecureHash>, val note: Column<String>)
@@ -282,11 +281,9 @@ fun Table.certificatePath(name: String) = this.registerColumn<CertPath>(name, Ce
 fun Table.publicKey(name: String) = this.registerColumn<PublicKey>(name, PublicKeyColumnType)
 fun Table.secureHash(name: String) = this.registerColumn<SecureHash>(name, SecureHashColumnType)
 fun Table.party(nameColumnName: String,
-                keyColumnName: String) = PartyColumns(this.varchar(nameColumnName, length = 255), this.publicKey(keyColumnName))
-fun Table.partyAndCertificate(nameColumnName: String,
                 keyColumnName: String,
                 certificateColumnName: String,
-                pathColumnName: String) = PartyAndCertificateColumns(this.varchar(nameColumnName, length = 255), this.publicKey(keyColumnName),
+                pathColumnName: String) = PartyColumns(this.varchar(nameColumnName, length = 255), this.publicKey(keyColumnName),
         this.certificate(certificateColumnName), this.certificatePath(pathColumnName))
 fun Table.uuidString(name: String) = this.registerColumn<UUID>(name, UUIDStringColumnType)
 fun Table.localDate(name: String) = this.registerColumn<LocalDate>(name, LocalDateColumnType)

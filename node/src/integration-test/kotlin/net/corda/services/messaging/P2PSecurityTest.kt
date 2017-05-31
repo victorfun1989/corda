@@ -9,7 +9,7 @@ import net.corda.core.seconds
 import net.corda.core.utilities.BOB
 import net.corda.core.utilities.DUMMY_BANK_A
 import net.corda.core.utilities.DUMMY_BANK_B
-import net.corda.core.utilities.getTestPartyAndCertificate
+import net.corda.core.utilities.getTestParty
 import net.corda.node.internal.NetworkMapInfo
 import net.corda.node.services.config.configureWithDevSSLCertificate
 import net.corda.node.services.messaging.sendRequest
@@ -68,7 +68,7 @@ class P2PSecurityTest : NodeBasedTest() {
     }
 
     private fun SimpleNode.registerWithNetworkMap(registrationName: X500Name): ListenableFuture<NetworkMapService.RegistrationResponse> {
-        val legalIdentity = getTestPartyAndCertificate(registrationName, identity.public)
+        val legalIdentity = getTestParty(registrationName, identity.public)
         val nodeInfo = NodeInfo(net.myAddress, legalIdentity, MOCK_VERSION_INFO.platformVersion)
         val registration = NodeRegistration(nodeInfo, System.currentTimeMillis(), AddOrRemove.ADD, Instant.MAX)
         val request = RegistrationRequest(registration.toWire(keyService, identity.public), net.myAddress)

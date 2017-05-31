@@ -6,7 +6,6 @@ import net.corda.core.crypto.DigitalSignature
 import net.corda.core.crypto.SignedData
 import net.corda.core.crypto.isFulfilledBy
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.messaging.MessageRecipients
 import net.corda.core.messaging.SingleMessageRecipient
 import net.corda.core.node.NodeInfo
@@ -117,7 +116,7 @@ interface NetworkMapService {
 class InMemoryNetworkMapService(services: ServiceHubInternal, minimumPlatformVersion: Int)
     : AbstractNetworkMapService(services, minimumPlatformVersion) {
 
-    override val nodeRegistrations: MutableMap<PartyAndCertificate, NodeRegistrationInfo> = ConcurrentHashMap()
+    override val nodeRegistrations: MutableMap<Party, NodeRegistrationInfo> = ConcurrentHashMap()
     override val subscribers = ThreadBox(mutableMapOf<SingleMessageRecipient, LastAcknowledgeInfo>())
 
     init {
@@ -143,7 +142,7 @@ abstract class AbstractNetworkMapService(services: ServiceHubInternal,
         private val logger = loggerFor<AbstractNetworkMapService>()
     }
 
-    protected abstract val nodeRegistrations: MutableMap<PartyAndCertificate, NodeRegistrationInfo>
+    protected abstract val nodeRegistrations: MutableMap<Party, NodeRegistrationInfo>
 
     // Map from subscriber address, to most recently acknowledged update map version.
     protected abstract val subscribers: ThreadBox<MutableMap<SingleMessageRecipient, LastAcknowledgeInfo>>

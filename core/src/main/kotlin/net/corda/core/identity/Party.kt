@@ -5,7 +5,9 @@ import net.corda.core.crypto.CertificateAndKeyPair
 import net.corda.core.crypto.toBase58String
 import net.corda.core.serialization.OpaqueBytes
 import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.cert.X509CertificateHolder
 import java.security.PublicKey
+import java.security.cert.CertPath
 
 /**
  * The [Party] class represents an entity on the network, which is typically identified by a legal [name] and public key
@@ -26,7 +28,9 @@ import java.security.PublicKey
  *
  * @see CompositeKey
  */
-open class Party(val name: X500Name, owningKey: PublicKey) : AbstractParty(owningKey) {
+class Party(val name: X500Name, owningKey: PublicKey,
+                 val certificate: X509CertificateHolder? = null,
+                 val certPath: CertPath? = null) : AbstractParty(owningKey) {
     constructor(certAndKey: CertificateAndKeyPair) : this(certAndKey.certificate.subject, certAndKey.keyPair.public)
     override fun toString() = name.toString()
     override fun nameOrNull(): X500Name? = name

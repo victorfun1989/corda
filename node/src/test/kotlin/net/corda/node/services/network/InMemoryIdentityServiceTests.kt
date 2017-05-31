@@ -3,7 +3,7 @@ package net.corda.node.services.network
 import net.corda.core.crypto.*
 import net.corda.core.identity.AnonymousParty
 import net.corda.core.identity.Party
-import net.corda.core.identity.PartyAndCertificate
+import net.corda.core.identity.Party
 import net.corda.core.node.services.IdentityService
 import net.corda.core.utilities.*
 import net.corda.node.services.identity.InMemoryIdentityService
@@ -55,7 +55,7 @@ class InMemoryIdentityServiceTests {
     fun `get identity by name`() {
         val service = InMemoryIdentityService(trustRoot = DUMMY_CA.certificate)
         val identities = listOf("Node A", "Node B", "Node C")
-                .map { getTestPartyAndCertificate(X500Name("CN=$it,O=R3,OU=corda,L=London,C=UK"), generateKeyPair().public) }
+                .map { getTestParty(X500Name("CN=$it,O=R3,OU=corda,L=London,C=UK"), generateKeyPair().public) }
         assertNull(service.partyFromX500Name(identities.first().name))
         identities.forEach { service.registerIdentity(it) }
         identities.forEach { assertEquals(it, service.partyFromX500Name(it.name)) }
@@ -91,7 +91,7 @@ class InMemoryIdentityServiceTests {
         val aliceTxKey = Crypto.generateKeyPair()
         val aliceTxCert = X509Utilities.createCertificate(CertificateType.IDENTITY, aliceRootCert, aliceRootKey, ALICE.name, aliceTxKey.public)
         val aliceCertPath = X509Utilities.createCertificatePath(aliceRootCert, aliceTxCert, revocationEnabled = false)
-        val alice = PartyAndCertificate(ALICE.name, aliceRootKey.public, aliceRootCert, aliceCertPath)
+        val alice = Party(ALICE.name, aliceRootKey.public, aliceRootCert, aliceCertPath)
 
         val anonymousAlice = AnonymousParty(aliceTxKey.public)
         service.registerAnonymousIdentity(anonymousAlice, alice, aliceCertPath)
@@ -101,7 +101,7 @@ class InMemoryIdentityServiceTests {
         val bobTxKey = Crypto.generateKeyPair()
         val bobTxCert = X509Utilities.createCertificate(CertificateType.IDENTITY, bobRootCert, bobRootKey, BOB.name, bobTxKey.public)
         val bobCertPath = X509Utilities.createCertificatePath(bobRootCert, bobTxCert, revocationEnabled = false)
-        val bob = PartyAndCertificate(BOB.name, bobRootKey.public, bobRootCert, bobCertPath)
+        val bob = Party(BOB.name, bobRootKey.public, bobRootCert, bobCertPath)
 
         val anonymousBob = AnonymousParty(bobTxKey.public)
         service.registerAnonymousIdentity(anonymousBob, bob, bobCertPath)

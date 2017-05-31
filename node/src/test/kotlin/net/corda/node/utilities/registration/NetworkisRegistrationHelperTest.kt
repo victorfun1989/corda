@@ -7,7 +7,7 @@ import net.corda.core.crypto.*
 import net.corda.core.exists
 import net.corda.core.mapToArray
 import net.corda.core.utilities.ALICE
-import net.corda.core.utilities.getTestPartyAndCertificate
+import net.corda.core.utilities.getTestParty
 import net.corda.testing.TestNodeConfiguration
 import net.corda.testing.getTestX509Name
 import org.bouncycastle.cert.X509CertificateHolder

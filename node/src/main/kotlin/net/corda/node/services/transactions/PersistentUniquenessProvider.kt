@@ -30,7 +30,7 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
         val output = stateRef("transaction_id", "output_index")
         val consumingTxHash = secureHash("consuming_transaction_id")
         val consumingIndex = integer("consuming_input_index")
-        val requestingParty = party("requesting_party_name", "requesting_party_key")
+        val requestingParty = party("requesting_party_name", "requesting_party_key", "requesting_party_certificate", "requesting_party_path")
     }
 
     private val committedStates = ThreadBox(object : AbstractJDBCHashMap<StateRef, UniquenessProvider.ConsumingTx, Table>(Table, loadOnInit = false) {
@@ -39,7 +39,8 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
         override fun valueFromRow(row: ResultRow): UniquenessProvider.ConsumingTx = UniquenessProvider.ConsumingTx(
                 row[table.consumingTxHash],
                 row[table.consumingIndex],
-                Party(X500Name(row[table.requestingParty.name]), row[table.requestingParty.owningKey])
+                Party(X500Name(row[table.requestingParty.name]), row[table.requestingParty.owningKey],
+                        row[table.requestingParty.certificate], row[table.requestingParty.certPath])
         )
 
         override fun addKeyToInsert(insert: InsertStatement,
@@ -56,6 +57,8 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
             insert[table.consumingIndex] = entry.value.inputIndex
             insert[table.requestingParty.name] = entry.value.requestingParty.name.toString()
             insert[table.requestingParty.owningKey] = entry.value.requestingParty.owningKey
+            insert[table.requestingParty.certificate] = entry.value.requestingParty.certificate
+            insert[table.requestingParty.certPath] = entry.value.requestingParty.certPath
         }
     })
 
