@@ -3,14 +3,28 @@ Release notes
 
 Here are release notes for each snapshot release from M9 onwards.
 
-Unreleased
-----------
+Milestone 12
+------------
 
-Writing CorDapps has been made simpler by removing boiler-plate code that was previously required when registering flows.
-Instead we now make use of classpath scanning to automatically wire-up flows.
+This milestone is a major step towards the first release of Corda, with many key APIs redesigned in preparation for
+stabilisation work. Highlights include:
 
-There are major changes to the ``Party`` class as part of confidential identities, and how parties and keys are stored
-in transaction state objects. See :doc:`changelog` for full details.
+* Writing CorDapps has been simplified by removing the need for boiler-plate code to register flows. Instead we now make
+  use of annotations and classpath scanning to automatically wire-up flows. Flows should have the ``@StartableByRPC``,
+  ``@InitiatingFlow`` and ``@InitiatedBy`` annotations applied as applicable, and will then be registered automatically
+  on node started.
+* The key service no long exposes private keys, in order that it can support use of a hardware security module (HSM) for
+  key storage. Instead it exposes functionality for signing data (typically transactions).
+* There are major changes to the ``Party`` class as part of confidential identities, and how parties and keys are stored
+  in transaction state objects.
+* The identity service now has support for storing anonymised identities associated with a well known identity (i.e. the
+  identity in the network map or other directory service), along with the certificate proving that association.
+* Node info includes an X.509 certificate and certificate path for the legal and service identities, which will be used
+  to provide an identity has been verified by a trusted authority.
+* ``MockIdentityService`` has been removed, and unit/integration tests now use ``InMemoryIdentityService`` instead. In
+  using the same identity service everywhere we eliminate risk of implementation differences affecting testing.
+
+See :doc:`changelog` for full details of the API changes included in this milestone.
 
 We've added the ability for flows to be versioned by their CorDapp developers. This enables a node to support a particular
 version of a flow and allows it to reject flow communication with a node which isn't using the same fact. In a future

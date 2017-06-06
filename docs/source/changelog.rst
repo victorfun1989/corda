@@ -94,8 +94,8 @@ UNRELEASED
   have a consistent class used internally. Conversions to/from ``X509Certificate`` are done as required, but should
   be avoided where possible.
 
-* The certificate hierarchy has been changed in order to allow corda node to sign keys with proper certificate chain.
-     * The corda node will now be issued a restricted client CA for identity/transaction key signing.
+* The certificate hierarchy has been changed in order to allow Corda node to sign keys with proper certificate chain.
+     * The Corda node will now be issued a restricted client CA for identity/transaction key signing.
      * TLS certificate are now stored in `sslkeystore.jks` and identity keys are stored in `nodekeystore.jks`
 .. warning:: The old keystore will need to be removed when upgrading to this version.
 
