@@ -132,7 +132,7 @@ class ExplorerSimulation(val options: OptionSet) {
 
     private fun startSimulation(eventGenerator: EventGenerator, maxIterations: Int) {
         // Log to logger when flow finish.
-        fun FlowHandle<Pair<SignedTransaction, Map<Party, AnonymisedIdentity>>>.log(seq: Int, name: String) {
+        fun FlowHandle<AbstractCashFlow.Result>.log(seq: Int, name: String) {
             val out = "[$seq] $name $id :"
             returnValue.success {
                 val (stx, idenities) = it
