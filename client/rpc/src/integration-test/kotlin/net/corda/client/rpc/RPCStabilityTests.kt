@@ -230,12 +230,10 @@ class RPCStabilityTests {
             assertEquals("pong", client.ping())
             serverFollower.shutdown()
             startRpcServer<ReconnectOps>(ops = ops, customPort = serverPort).getOrThrow()
-            val background = Executors.newSingleThreadExecutor()
-            val pingFuture = background.submit(Callable {
-                client.ping() // Would also hang in foreground, we need it in background so we can timeout.
-            })
+            val pingFuture = future {
+                client.ping()
+            }
             assertEquals("pong", pingFuture.getOrThrow(10.seconds))
-            background.shutdown()
             clientFollower.shutdown() // Driver would do this after the new server, causing hang.
         }
     }

@@ -42,8 +42,8 @@ import rx.Subscription
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.*
+import kotlin.collections.ArrayList
 
 data class RPCServerConfiguration(
         /** The number of threads to use for handling RPC requests */
@@ -93,9 +93,11 @@ class RPCServer(
     }
 
     private sealed class BufferOrNone {
-        data class Buffer(val container: Queue<() -> Unit>) : BufferOrNone()
+        data class Buffer(val container: MutableCollection<MessageAndContext>) : BufferOrNone()
         object None : BufferOrNone()
     }
+
+    private data class MessageAndContext(val message: RPCApi.ServerToClient.RpcReply, val context: ObservableContext)
 
     private val lifeCycle = LifeCycle(State.UNSTARTED)
     /** The methodname->Method map to use for dispatching. */
@@ -243,11 +245,8 @@ class RPCServer(
     }
 
     private fun drainBuffer(buffer: BufferOrNone.Buffer) {
-        buffer.container.let {
-            while (!it.isEmpty()) {
-                val sendMessage = it.poll()
-                rpcExecutor!!.submit(sendMessage)
-            }
+        buffer.container.forEach {
+            it.context.sendMessage(it.message)
         }
     }
 
@@ -318,9 +317,8 @@ class RPCServer(
                 kryoPool
         )
 
-        val sendMessage = { observableContext.sendMessage(reply) }
-        val buffered = bufferIfQueueNotBound(clientAddress, sendMessage)
-        if (!buffered) sendMessage()
+        val buffered = bufferIfQueueNotBound(clientAddress, reply, observableContext)
+        if (!buffered) observableContext.sendMessage(reply)
     }
 
     /**
@@ -330,18 +328,19 @@ class RPCServer(
      * but the client queue is not yet set up. We buffer the messages and flush the buffer only once
      * we receive a notification that the client queue bindings were added.
      */
-    private fun bufferIfQueueNotBound(clientAddress: SimpleString, sendMessage: () -> Unit): Boolean {
-        return responseMessageBuffer.compute(clientAddress, { _, value ->
+    private fun bufferIfQueueNotBound(clientAddress: SimpleString, message: RPCApi.ServerToClient.RpcReply, context: ObservableContext): Boolean {
+        val clientBuffer = responseMessageBuffer.compute(clientAddress, { _, value ->
             when (value) {
-                null -> BufferOrNone.Buffer(ConcurrentLinkedQueue<() -> Unit>()).apply {
-                    container.add(sendMessage)
+                null -> BufferOrNone.Buffer(ArrayList<MessageAndContext>()).apply {
+                    container.add(MessageAndContext(message, context))
                 }
                 is BufferOrNone.Buffer -> value.apply {
-                    container.add(sendMessage)
+                    container.add(MessageAndContext(message, context))
                 }
                 is BufferOrNone.None -> value
             }
-        }) is BufferOrNone.Buffer
+        })
+        return clientBuffer is BufferOrNone.Buffer
     }
 
     private fun reapSubscriptions() {
