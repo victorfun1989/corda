@@ -563,7 +563,7 @@ class NodeMessagingClient(override val config: NodeConfiguration,
         }
     }
 
-
+    // TODO SingleMessageRecipient/HostAndPort problem
     override fun getAddressOfParty(partyInfo: PartyInfo): MessageRecipients {
         return when (partyInfo) {
             is PartyInfo.Node -> partyInfo.node.addresses.first() // TODO load balancing

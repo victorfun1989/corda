@@ -330,8 +330,11 @@ class InMemoryMessagingNetwork(
 
         override fun getAddressOfParty(partyInfo: PartyInfo): MessageRecipients {
             return when (partyInfo) {
+                // TODO transform it to PeerHandle?
+                //  add address to peerHandle
+                //  Or have a wrapper for that sth like Either handle or recipient
                 is PartyInfo.Node -> partyInfo.node.addresses.first()
-                is PartyInfo.Service -> ServiceHandle(partyInfo.service)
+                is PartyInfo.Service -> ServiceHandle(partyInfo.service) // TODO other solution -> this returns the address too
             }
         }
 

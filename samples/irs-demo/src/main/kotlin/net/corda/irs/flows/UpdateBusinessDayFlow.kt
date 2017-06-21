@@ -65,7 +65,8 @@ object UpdateBusinessDayFlow {
 
         @Suspendable
         private fun doNextRecipient(recipient: NodeInfo) {
-            if (recipient.addresses.first() is MockNetworkMapCache.MockAddress) {
+            val host = recipient.addresses.first().host
+            if (host == "bankC" || host == "bankD") { // TODO get rid of that
                 // Ignore
             } else {
                 send(recipient.legalIdentity, UpdateBusinessDayMessage(date))

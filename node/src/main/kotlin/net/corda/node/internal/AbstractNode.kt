@@ -3,6 +3,7 @@ package net.corda.node.internal
 import com.codahale.metrics.MetricRegistry
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.collect.MutableClassToInstanceMap
+import com.google.common.net.HostAndPort
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
@@ -15,7 +16,6 @@ import net.corda.core.identity.Party
 import net.corda.core.identity.PartyAndCertificate
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.RPCOps
-import net.corda.core.messaging.SingleMessageRecipient
 import net.corda.core.node.*
 import net.corda.core.node.services.*
 import net.corda.core.node.services.NetworkMapCache.MapChange
@@ -55,6 +55,7 @@ import net.corda.node.utilities.AddOrRemove.ADD
 import net.corda.node.utilities.AffinityExecutor
 import net.corda.node.utilities.configureDatabase
 import net.corda.node.utilities.transaction
+import net.corda.nodeapi.ArtemisMessagingComponent
 import org.apache.activemq.artemis.utils.ReusableLatch
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.X509CertificateHolder
@@ -103,7 +104,7 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
     var networkMapSeq: Long = 1
 
     protected abstract val log: Logger
-    protected abstract val networkMapAddress: SingleMessageRecipient?
+    protected abstract val networkMapAddress: HostAndPort?
     protected abstract val platformVersion: Int
 
     // We will run as much stuff in this single thread as possible to keep the risk of thread safety bugs low during the
@@ -529,9 +530,10 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
     private fun makeInfo(): NodeInfo {
         val advertisedServiceEntries = makeServiceEntries()
         val legalIdentity = obtainLegalIdentity() //todo merge legalIdentity and advertisedServices identities
-        // TODO take network.myAddress addresses from configs?
-        // TODO add legalIdentities from services
-        return NodeInfo(listOf(network.myAddress), setOf(legalIdentity), platformVersion, advertisedServiceEntries, findMyLocation())
+        // todo inMemoryMessaging network will give an address as PeerHandle so it's sad, we could do some dummy hostAndPort
+        //  or override the makeInfo for mockNode to have singleMessageRecipient
+        val myAddress = (network.myAddress as ArtemisMessagingComponent.ArtemisPeerAddress).hostAndPort
+        return NodeInfo(listOf(myAddress), setOf(legalIdentity), platformVersion, advertisedServiceEntries, findMyLocation())
     }
 
     /**
@@ -624,7 +626,6 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
         require(networkMapAddress != null || NetworkMapService.type in advertisedServices.map { it.type }) {
             "Initial network map address must indicate a node that provides a network map service"
         }
-        // TODO single message recipient
         val address = networkMapAddress ?: info.addresses.first() // TODO for now it's the first address from a list
         // Register for updates, even if we're the one running the network map.
         return sendNetworkMapRegistration(address).flatMap { (error) ->
@@ -634,14 +635,15 @@ abstract class AbstractNode(open val configuration: NodeConfiguration,
         }
     }
 
-    private fun sendNetworkMapRegistration(networkMapAddress: SingleMessageRecipient): ListenableFuture<RegistrationResponse> {
+    private fun sendNetworkMapRegistration(networkMapAddress: HostAndPort): ListenableFuture<RegistrationResponse> {
         // Register this node against the network
         val instant = platformClock.instant()
         val expires = instant + NetworkMapService.DEFAULT_EXPIRATION_PERIOD
         val reg = NodeRegistration(info, instant.toEpochMilli(), ADD, expires)
         val legalIdentityKey = obtainLegalIdentityKey()
         val request = NetworkMapService.RegistrationRequest(reg.toWire(keyManagement, legalIdentityKey.public), network.myAddress)
-        return network.sendRequest(NetworkMapService.REGISTER_TOPIC, request, networkMapAddress)
+        val networkMapRecipient = ArtemisMessagingComponent.NetworkMapAddress(networkMapAddress)
+        return network.sendRequest(NetworkMapService.REGISTER_TOPIC, request, networkMapRecipient)
     }
 
     /** This is overriden by the mock node implementation to enable operation without any network map service */

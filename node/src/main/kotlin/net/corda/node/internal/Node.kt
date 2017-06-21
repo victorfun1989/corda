@@ -34,7 +34,6 @@ import net.corda.node.utilities.AddressUtils
 import net.corda.node.utilities.AffinityExecutor
 import net.corda.nodeapi.ArtemisMessagingComponent.Companion.IP_REQUEST_PREFIX
 import net.corda.nodeapi.ArtemisMessagingComponent.Companion.PEER_USER
-import net.corda.nodeapi.ArtemisMessagingComponent.NetworkMapAddress
 import net.corda.nodeapi.ArtemisTcpTransport
 import net.corda.nodeapi.ConnectionDirection
 import net.corda.nodeapi.internal.ShutdownHook
@@ -84,7 +83,7 @@ open class Node(override val configuration: FullNodeConfiguration,
 
     override val log: Logger get() = logger
     override val platformVersion: Int get() = versionInfo.platformVersion
-    override val networkMapAddress: NetworkMapAddress? get() = configuration.networkMapService?.address?.let(::NetworkMapAddress)
+    override val networkMapAddress: HostAndPort? get() = configuration.networkMapService?.address
     override fun makeTransactionVerifierService() = (network as NodeMessagingClient).verifierService
 
     // DISCUSSION
@@ -184,7 +183,7 @@ open class Node(override val configuration: FullNodeConfiguration,
             val foundPublicIP = AddressUtils.tryDetectPublicIP()
 
             if (foundPublicIP == null) {
-                networkMapAddress?.let { return discoverPublicHost(it.hostAndPort) }
+                networkMapAddress?.let { return discoverPublicHost(it) }
             } else {
                 log.info("Detected public IP: ${foundPublicIP.hostAddress}. This will be used instead of the provided \"$host\" as the advertised address.")
                 return foundPublicIP.hostAddress
